@@ -67,7 +67,7 @@ public class AdminController {
                     u.setEmail(names[i].toLowerCase().replace(" ", ".") + "@example.com");
                     u.setUsername("user_gen_" + i + "_" + System.currentTimeMillis() % 1000);
                     u.setPasswordHash("hashed_pw");
-                    u.setCredits(100);
+                    u.setCredits(1000);
                     u.setXp(50 * (i + 1));
                     u.setLevel(1 + i/2);
                     userRepository.save(u);

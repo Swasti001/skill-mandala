@@ -29,8 +29,8 @@ public class User {
     @Column(name = "status", columnDefinition = "varchar(255) default 'ACTIVE'")
     private String status = "ACTIVE";
 
-    @Column(name = "credits", columnDefinition = "integer default 0")
-    private int credits = 0;
+    @Column(name = "credits", columnDefinition = "integer default 1000")
+    private int credits = 1000;
 
     @Column(name = "xp", columnDefinition = "integer default 0")
     private int xp = 0;
