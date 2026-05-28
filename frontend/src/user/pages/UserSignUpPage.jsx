@@ -2,7 +2,9 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import Logo from "../components/Logo";
+import { Eye, EyeOff } from "lucide-react";
 import api from "../api";
+import { useUser } from "../../context/UserContext";
 
 const UserSignUpPage = ({ setIsAuthenticated }) => {
   const [name, setName] = useState("");
@@ -11,9 +13,13 @@ const UserSignUpPage = ({ setIsAuthenticated }) => {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
 
+  const { setUser, refreshUser } = useUser();
   const navigate = useNavigate();
 
   const validatePassword = (p) => {
@@ -61,6 +67,9 @@ const UserSignUpPage = ({ setIsAuthenticated }) => {
     const passPolicy = validatePassword(password);
     if (passPolicy) newErrors.password = passPolicy;
 
+    // Confirm Password
+    if (password !== confirmPassword) newErrors.confirmPassword = "Passwords do not match";
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -72,6 +81,13 @@ const UserSignUpPage = ({ setIsAuthenticated }) => {
     if (!validateForm()) return;
 
     setLoading(true);
+
+    // Clear stale cached/localStorage user data before signup
+    localStorage.removeItem("token");
+    localStorage.removeItem("userId");
+    localStorage.removeItem("user");
+    localStorage.removeItem("onboardingCompleted");
+    localStorage.removeItem("currentOnboardingStep");
 
     try {
       const formattedDob = dob ? new Date(dob).toISOString().split("T")[0] : null;
@@ -92,11 +108,16 @@ const UserSignUpPage = ({ setIsAuthenticated }) => {
         localStorage.setItem("token", data.token);
         localStorage.setItem("userId", data.user.id);
         localStorage.setItem("user", JSON.stringify(data.user));
+        setUser(data.user);
 
         localStorage.setItem("onboardingCompleted", data.onboarding.completed ? "true" : "false");
         localStorage.setItem("currentOnboardingStep", data.onboarding.currentStep);
 
         setIsAuthenticated(true);
+        
+        // Fetch full user details from backend immediately
+        await refreshUser();
+        
         navigate("/onboarding/profile", { replace: true });
       } else {
         setErrors({ general: "Signup failed. Please check your details." });
@@ -269,20 +290,52 @@ const UserSignUpPage = ({ setIsAuthenticated }) => {
 
             <div>
               <label className="block text-xs font-semibold text-slate-300 mb-1">Password</label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className={`w-full px-3 py-2 rounded-xl bg-slate-950 border ${errors.password ? 'border-red-500' : 'border-slate-700'} text-sm focus:outline-none focus:ring-2 focus:ring-purple-500`}
-                placeholder="••••••••"
-                required
-              />
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className={`w-full px-3 py-2 rounded-xl bg-slate-950 border ${errors.password ? 'border-red-500' : 'border-slate-700'} text-sm focus:outline-none focus:ring-2 focus:ring-purple-500`}
+                  placeholder="••••••••"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-purple-400 hover:text-purple-300"
+                >
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
               {errors.password && <p className="text-[10px] text-red-500 mt-1 pl-1">{errors.password}</p>}
               {!errors.password && (
                 <p className="text-[10px] text-slate-500 mt-1 pl-1">
                   At least 8 chars, including A-Z, a-z, 0-9, and a special character.
                 </p>
               )}
+            </div>
+
+            {/* Confirm Password */}
+            <div>
+              <label className="block text-xs font-semibold text-slate-300 mb-1">Confirm Password</label>
+              <div className="relative">
+                <input
+                  type={showConfirmPassword ? "text" : "password"}
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className={`w-full px-3 py-2 rounded-xl bg-slate-950 border ${errors.confirmPassword ? 'border-red-500' : 'border-slate-700'} text-sm focus:outline-none focus:ring-2 focus:ring-purple-500`}
+                  placeholder="••••••••"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-purple-400 hover:text-purple-300"
+                >
+                  {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
+              {errors.confirmPassword && (<p className="text-[10px] text-red-500 mt-1 pl-1">{errors.confirmPassword}</p>)}
             </div>
 
             {errors.general && (

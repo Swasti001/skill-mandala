@@ -1,5 +1,8 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import { motion } from "framer-motion";
+import Logo from "../components/Logo";
+import api from "../api";
 
 const ForgotPasswordPage = () => {
   const [email, setEmail] = useState("");
@@ -13,73 +16,143 @@ const ForgotPasswordPage = () => {
     setError("");
 
     try {
-      const res = await fetch("http://localhost:8080/api/auth/forgot-password", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
-      });
-      const data = await res.json();
-      if (res.ok) {
-        setSuccess(true);
-      } else {
-        setError(data.message || "Failed to process request.");
-      }
+      await api.post("/auth/forgot-password", { email });
+      setSuccess(true);
     } catch (err) {
-      setError("Network error. Try again.");
+      setError(err.response?.data?.message || "Failed to process request.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex bg-slate-950 items-center justify-center px-6">
-      <div className="w-full max-w-md bg-slate-900 border border-slate-700 p-8 rounded-3xl shadow-xl">
-        <h2 className="text-2xl font-bold text-white mb-2 text-center">Reset Password</h2>
-        <p className="text-sm text-slate-400 mb-8 text-center">
-          Securing your access to the Skill Mandala.
-        </p>
+    <div className="min-h-screen flex bg-[#020617] text-slate-50 relative overflow-hidden">
+      {/* Background Ambient Glows */}
+      <div className="absolute bottom-0 left-0 w-[800px] h-[800px] bg-amber-900/10 rounded-full blur-[120px] pointer-events-none mix-blend-screen" />
+      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-amber-900/10 rounded-full blur-[100px] pointer-events-none mix-blend-screen" />
 
-        {error && <div className="bg-red-500/10 border border-red-500/50 text-red-500 text-xs p-3 rounded-xl mb-6 text-center">{error}</div>}
+      {/* Top-Right Revolving Small Yellow Geometric Mandala */}
+      <motion.div
+        className="absolute -top-[200px] -right-[200px] pointer-events-none opacity-40 z-0"
+        animate={{ rotate: -360 }}
+        transition={{ duration: 200, repeat: Infinity, ease: "linear" }}
+      >
+        <svg viewBox="0 0 1000 1000" className="w-[600px] h-[600px] stroke-amber-500/40">
+          <circle cx="500" cy="500" r="450" className="fill-none stroke-[6px]" strokeDasharray="120 40" />
+          {[...Array(16)].map((_, i) => (
+            <rect key={`tr-d1-${i}`} x="495" y="10" width="10" height="10" transform={`rotate(${i * 22.5 + 11.25} 500 500)`} className="fill-none stroke-[2px]" />
+          ))}
+          {[...Array(32)].map((_, i) => (
+            <g key={`tr-b1-${i}`} transform={`rotate(${i * 11.25} 500 500)`}>
+              <rect x="480" y="100" width="40" height="15" className="fill-none stroke-[2px]" />
+              <line x1="500" y1="115" x2="500" y2="135" className="stroke-[2px]" />
+              <rect x="495" y="140" width="10" height="10" transform="rotate(45 500 145)" className="fill-none stroke-[1.5px]" />
+            </g>
+          ))}
+          {[...Array(24)].map((_, i) => (
+            <path key={`tr-z1-${i}`} d="M 500 180 L 530 250 L 500 320 L 470 250 Z" transform={`rotate(${i * 15} 500 500)`} className="fill-transparent stroke-[1.5px]" />
+          ))}
+          {[...Array(24)].map((_, i) => (
+            <path key={`tr-z2-${i}`} d="M 500 250 L 520 300 L 500 350 L 480 300 Z" transform={`rotate(${i * 15 + 7.5} 500 500)`} className="fill-transparent stroke-[1.5px]" />
+          ))}
+          {[...Array(24)].map((_, i) => (
+            <path key={`tr-z3-${i}`} d="M 500 320 L 510 360 L 500 400 L 490 360 Z" transform={`rotate(${i * 15} 500 500)`} className="fill-transparent stroke-[1.5px]" />
+          ))}
+          {[1,2,3,4].map(r => <circle key={`tr-c-${r}`} cx="500" cy="500" r={r * 40} className="fill-none stroke-[1.5px]" />)}
+          {[...Array(16)].map((_, i) => (
+            <line key={`tr-sun-${i}`} x1="500" y1="500" x2="500" y2="460" transform={`rotate(${i * 22.5} 500 500)`} className="stroke-[2px]" />
+          ))}
+          <circle cx="500" cy="500" r="10" className="fill-none stroke-[3px]" />
+        </svg>
+      </motion.div>
 
-        {!success ? (
-          <form onSubmit={handleRequestReset} className="space-y-4">
-            <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1">Email Address</label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 transition"
-                placeholder="you@example.com"
-                required
-              />
-            </div>
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-3 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold text-sm hover:brightness-110 shadow-lg"
-            >
-              {loading ? "Sending..." : "Send Reset Link"}
-            </button>
-          </form>
-        ) : (
-          <div className="text-center space-y-4">
-            <div className="bg-emerald-500/10 border border-emerald-500/50 text-emerald-400 text-sm p-4 rounded-xl mb-6">
-              If an account is registered to this email, we have sent a reset link. Please check your inbox.
-            </div>
-            <Link to="/login" className="px-8 py-3 rounded-full bg-white text-black font-bold text-sm hover:brightness-90 transition inline-block">
-              Back to Login
-            </Link>
+      {/* Bottom-Left Revolving Large Yellow Geometric Mandala */}
+      <motion.div
+        className="absolute -bottom-[400px] -left-[400px] pointer-events-none opacity-60 z-0"
+        animate={{ rotate: 360 }}
+        transition={{ duration: 240, repeat: Infinity, ease: "linear" }}
+      >
+        <svg viewBox="0 0 1000 1000" className="w-[1200px] h-[1200px] stroke-amber-500/40">
+          <circle cx="500" cy="500" r="450" className="fill-none stroke-[6px]" strokeDasharray="120 40" />
+          {[...Array(16)].map((_, i) => (
+            <rect key={`c-d1-${i}`} x="495" y="10" width="10" height="10" transform={`rotate(${i * 22.5 + 11.25} 500 500)`} className="fill-none stroke-[2px]" />
+          ))}
+          {[...Array(32)].map((_, i) => (
+            <g key={`c-b1-${i}`} transform={`rotate(${i * 11.25} 500 500)`}>
+              <rect x="480" y="100" width="40" height="15" className="fill-none stroke-[2px]" />
+              <line x1="500" y1="115" x2="500" y2="135" className="stroke-[2px]" />
+              <rect x="495" y="140" width="10" height="10" transform="rotate(45 500 145)" className="fill-none stroke-[1.5px]" />
+            </g>
+          ))}
+          {[...Array(24)].map((_, i) => (
+            <path key={`c-z1-${i}`} d="M 500 180 L 530 250 L 500 320 L 470 250 Z" transform={`rotate(${i * 15} 500 500)`} className="fill-transparent stroke-[1.5px]" />
+          ))}
+          {[...Array(24)].map((_, i) => (
+            <path key={`c-z2-${i}`} d="M 500 250 L 520 300 L 500 350 L 480 300 Z" transform={`rotate(${i * 15 + 7.5} 500 500)`} className="fill-transparent stroke-[1.5px]" />
+          ))}
+          {[...Array(24)].map((_, i) => (
+            <path key={`c-z3-${i}`} d="M 500 320 L 510 360 L 500 400 L 490 360 Z" transform={`rotate(${i * 15} 500 500)`} className="fill-transparent stroke-[1.5px]" />
+          ))}
+          {[1,2,3,4].map(r => <circle key={`c-c-${r}`} cx="500" cy="500" r={r * 40} className="fill-none stroke-[1.5px]" />)}
+          {[...Array(16)].map((_, i) => (
+            <line key={`c-sun-${i}`} x1="500" y1="500" x2="500" y2="460" transform={`rotate(${i * 22.5} 500 500)`} className="stroke-[2px]" />
+          ))}
+          <circle cx="500" cy="500" r="10" className="fill-none stroke-[3px]" />
+        </svg>
+      </motion.div>
+
+      <div className="flex-1 flex items-center justify-center px-6 py-10 relative z-10">
+        <div className="w-full max-w-md bg-[#12182B]/80 backdrop-blur-2xl border border-white/10 rounded-[32px] shadow-[0_0_50px_rgba(0,0,0,0.5)] p-10">
+          <div className="flex justify-center mb-8">
+            <Logo />
           </div>
-        )}
+          <h2 className="text-2xl font-bold text-white mb-2 text-center">Reset Password</h2>
+          <p className="text-sm text-slate-400 mb-8 text-center">Securing your access to the Skill Mandala.</p>
 
-        {!success && (
-          <div className="mt-8 text-center">
-            <Link to="/login" className="text-slate-400 text-xs hover:text-white transition underline">
-              Wait, I remember my password
-            </Link>
-          </div>
-        )}
+          {error && (
+            <div className="bg-red-500/10 border border-red-500/50 text-red-500 text-xs p-3 rounded-xl mb-6 text-center">{error}</div>
+          )}
+
+          {!success ? (
+            <form onSubmit={handleRequestReset} className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">Email Address</label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 transition"
+                  placeholder="you@example.com"
+                  required
+                />
+              </div>
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full py-3 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold text-sm hover:brightness-110 shadow-lg"
+              >
+                {loading ? "Sending..." : "Send Reset Link"}
+              </button>
+            </form>
+          ) : (
+            <div className="text-center space-y-4">
+              <div className="bg-emerald-500/10 border border-emerald-500/50 text-emerald-400 text-sm p-4 rounded-xl mb-6">
+                If an account is registered to this email, we have sent a reset link. Please check your inbox.
+              </div>
+              <Link to="/login" className="px-8 py-3 rounded-full bg-white text-black font-bold text-sm hover:brightness-90 transition inline-block">
+                Back to Login
+              </Link>
+            </div>
+          )}
+
+          {!success && (
+            <div className="mt-8 text-center">
+              <Link to="/login" className="text-slate-400 text-xs hover:text-white transition underline">
+                Wait, I remember my password
+              </Link>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

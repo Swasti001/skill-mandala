@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import api from "../api";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   MessageSquare, User, MapPin, Monitor, 
@@ -24,9 +24,7 @@ const UserMatches = () => {
     const fetchMutualMatches = async () => {
       try {
         setLoading(true);
-        const res = await axios.get(`http://localhost:8080/api/user/matches/mutual/${userId}`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        const res = await api.get(`/user/matches/mutual/${userId}`);
         setMatches(res.data || []);
       } catch (err) {
         console.error("Failed to fetch mutual matches:", err);

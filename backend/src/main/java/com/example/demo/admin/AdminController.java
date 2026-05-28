@@ -100,9 +100,35 @@ public class AdminController {
             Long r1 = users.size() > 0 ? users.get(0).getId() : 1L;
             Long r2 = users.size() > 1 ? users.get(1).getId() : 2L;
 
-            reportRepo.save(new Report("HIGH PRIORITY", "HARASSMENT", "Abusive behavior in 'Node.js Expert' Session", "User sent multiple derogatory messages...", r1, r2, "red", "PENDING"));
-            reportRepo.save(new Report("MEDIUM PRIORITY", "POTENTIAL SCAM", "Off-platform payment request", "User requested payment via external...", r2, r1, "purple", "PENDING"));
-            reportRepo.save(new Report("LOW PRIORITY", "INAPPROPRIATE CONTENT", "Profile bio contains profanity", "Profile description uses multiple flagged...", r1, r2, "gray", "PENDING"));
+            Report rep1 = new Report("HIGH PRIORITY", "HARASSMENT", "Abusive behavior in 'Node.js Expert' Session", 
+                "The reported user started shouting profanities when we encountered a code bug, and then typed abusive comments in the session chat.", 
+                r1, r2, "red", "PENDING");
+            rep1.setRelatedEntity("Session #12 ('Node.js Expert')");
+            rep1.setReporterEvidence("Chat Log: 'You are an idiot, you don't even know how to write simple JS code. Get out of here!'");
+            rep1.setReportedResponse("I got frustrated because the reporter had zero knowledge of basic programming but listed themselves as intermediate. I apologize for my language, but it wasn't a one-sided abuse.");
+            rep1.setReportedEvidence("Screenshot of reporter's code snippet demonstrating lack of basic understanding.");
+            rep1.setAdminNotes("Awaiting admin review of the audio recording or chat history logs.");
+            reportRepo.save(rep1);
+
+            Report rep2 = new Report("MEDIUM PRIORITY", "POTENTIAL SCAM", "Off-platform payment request", 
+                "After scheduling a React-Native session, the user messaged me asking to pay 50 USD directly to their Paypal before starting. They refused to use the platform credits.", 
+                r2, r1, "purple", "PENDING");
+            rep2.setRelatedEntity("Exchange Request #24 (React-Native for UI design)");
+            rep2.setReporterEvidence("Paypal link requested: paypal.me/scammer_user - Message screenshot showing request.");
+            rep2.setReportedResponse("Platform credits are hard to redeem, so I just asked if we could do direct PayPal instead. I didn't know it violates the terms of service. I will follow the rules from now on.");
+            rep2.setReportedEvidence("No evidence provided by the reported user.");
+            rep2.setAdminNotes("User claims ignorance, but asking for off-platform payment violates guideline 4.2.");
+            reportRepo.save(rep2);
+
+            Report rep3 = new Report("LOW PRIORITY", "INAPPROPRIATE CONTENT", "Profile bio contains profanity", 
+                "Look at this user's profile biography. It has curse words in it and makes inappropriate jokes.", 
+                r1, r2, "gray", "PENDING");
+            rep3.setRelatedEntity("User Profile Biography");
+            rep3.setReporterEvidence("Bio text snippet: '...I like to code and fuck shit up, life's too short for boring shit...'");
+            rep3.setReportedResponse("This is just a slang and standard expression, not intended to offend anyone. I'm happy to change the words if it is deemed inappropriate.");
+            rep3.setReportedEvidence("No evidence provided.");
+            rep3.setAdminNotes("Clean bio guidelines apply.");
+            reportRepo.save(rep3);
         }
 
         if (skillRepo.count() == 0) {
@@ -468,8 +494,6 @@ public class AdminController {
             List<Map<String, Object>> reportsList = new ArrayList<>();
 
             for (Report r : reports) {
-                if (!"PENDING".equals(r.getStatus())) continue;
-
                 Map<String, Object> rMap = new HashMap<>();
                 rMap.put("id", r.getId());
                 rMap.put("priority", r.getPriority());
@@ -477,14 +501,26 @@ public class AdminController {
                 rMap.put("title", r.getTitle());
                 rMap.put("desc", r.getDescription());
                 rMap.put("color", r.getColor());
+                rMap.put("status", r.getStatus());
+                rMap.put("createdAt", r.getCreatedAt().toString());
+                rMap.put("relatedEntity", r.getRelatedEntity());
+                rMap.put("reportedResponse", r.getReportedResponse());
+                rMap.put("reporterEvidence", r.getReporterEvidence());
+                rMap.put("reportedEvidence", r.getReportedEvidence());
+                rMap.put("adminNotes", r.getAdminNotes());
+                rMap.put("actionTaken", r.getActionTaken());
 
-                // Mock resolving users for simplicity
+                // Resolve reporter details
                 User reporterUser = userRepository.findById(r.getReporterId()).orElse(null);
                 User reportedUser = userRepository.findById(r.getReportedId()).orElse(null);
 
                 Map<String, Object> reporterInfo = new HashMap<>();
                 if (reporterUser != null) {
+                    reporterInfo.put("id", reporterUser.getId());
                     reporterInfo.put("name", reporterUser.getName());
+                    reporterInfo.put("email", reporterUser.getEmail());
+                    reporterInfo.put("username", reporterUser.getUsername());
+                    reporterInfo.put("status", reporterUser.getStatus());
                     reporterInfo.put("sub", "Trust Score: 98%");
                     reporterInfo.put("img", "https://ui-avatars.com/api/?name=" + reporterUser.getName().replace(" ", "+") + "&background=random");
                 } else {
@@ -495,7 +531,11 @@ public class AdminController {
 
                 Map<String, Object> reportedInfo = new HashMap<>();
                 if (reportedUser != null) {
+                    reportedInfo.put("id", reportedUser.getId());
                     reportedInfo.put("name", reportedUser.getName());
+                    reportedInfo.put("email", reportedUser.getEmail());
+                    reportedInfo.put("username", reportedUser.getUsername());
+                    reportedInfo.put("status", reportedUser.getStatus());
                     reportedInfo.put("sub", "Member");
                     reportedInfo.put("initials", reportedUser.getName().substring(0, Math.min(reportedUser.getName().length(), 2)).toUpperCase());
                     reportedInfo.put("type", "text");
@@ -511,9 +551,9 @@ public class AdminController {
 
             Map<String, Object> response = new HashMap<>();
             response.put("metrics", Map.of(
-                "pendingHighPriority", reports.stream().filter(r -> "HIGH PRIORITY".equals(r.getPriority())).count(),
+                "pendingHighPriority", reports.stream().filter(r -> "PENDING".equals(r.getStatus()) && "HIGH PRIORITY".equals(r.getPriority())).count(),
                 "totalReports24H", reports.size(),
-                "moderatedToday", reportRepo.countByStatus("RESOLVED"),
+                "moderatedToday", reports.stream().filter(r -> "RESOLVED".equals(r.getStatus()) || "REJECTED".equals(r.getStatus())).count(),
                 "avgResponseTime", "14m"
             ));
             response.put("reportsList", reportsList);
@@ -671,6 +711,22 @@ public class AdminController {
         }
     }
 
+    @PutMapping("/reports/{id}/reject")
+    public ResponseEntity<?> rejectReport(@PathVariable Long id, @RequestHeader(value = "Authorization", required = false) String authHeader) {
+        User user = userService.getUserFromToken(authHeader);
+        if (!userService.isAdmin(user)) return org.springframework.http.ResponseEntity.status(org.springframework.http.HttpStatus.FORBIDDEN).body(Map.of("message", "Forbidden access"));
+        try {
+            Report report = reportRepo.findById(id).orElse(null);
+            if (report == null) return ResponseEntity.notFound().build();
+            report.setStatus("REJECTED");
+            report.setActionTaken("DISMISSED");
+            reportRepo.save(report);
+            return ResponseEntity.ok(Map.of("message", "Report #" + id + " dismissed/rejected successfully", "status", "REJECTED"));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(Map.of("message", "Failed to reject report"));
+        }
+    }
+
     @PutMapping("/reports/{id}/warn")
     public ResponseEntity<?> warnReport(@PathVariable Long id, @RequestHeader(value = "Authorization", required = false) String authHeader) {
         User user = userService.getUserFromToken(authHeader);
@@ -678,7 +734,8 @@ public class AdminController {
         try {
             Report report = reportRepo.findById(id).orElse(null);
             if (report == null) return ResponseEntity.notFound().build();
-            report.setStatus("WARNED");
+            report.setStatus("RESOLVED");
+            report.setActionTaken("WARNING");
             reportRepo.save(report);
 
             // Notify the offending user
@@ -689,9 +746,40 @@ public class AdminController {
                 report.getReportedId()
             );
 
-            return ResponseEntity.ok(Map.of("message", "Warning issued for Report #" + id, "status", "WARNED"));
+            return ResponseEntity.ok(Map.of("message", "Warning issued for Report #" + id, "status", "RESOLVED"));
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(Map.of("message", "Failed to warn"));
+        }
+    }
+
+    @PutMapping("/reports/{id}/suspend")
+    public ResponseEntity<?> suspendReport(@PathVariable Long id, @RequestHeader(value = "Authorization", required = false) String authHeader) {
+        User user = userService.getUserFromToken(authHeader);
+        if (!userService.isAdmin(user)) return org.springframework.http.ResponseEntity.status(org.springframework.http.HttpStatus.FORBIDDEN).body(Map.of("message", "Forbidden access"));
+        try {
+            Report report = reportRepo.findById(id).orElse(null);
+            if (report == null) return ResponseEntity.notFound().build();
+            
+            User offendingUser = userRepository.findById(report.getReportedId()).orElse(null);
+            if (offendingUser != null) {
+                offendingUser.setStatus("SUSPENDED");
+                userRepository.save(offendingUser);
+                
+                notificationService.createNotification(
+                    "Your account has been temporarily SUSPENDED due to safety policy violations. Contact support@mandala.io.",
+                    "SUSPEND",
+                    null,
+                    offendingUser.getId()
+                );
+            }
+
+            report.setStatus("RESOLVED");
+            report.setActionTaken("SUSPENSION");
+            reportRepo.save(report);
+            
+            return ResponseEntity.ok(Map.of("message", "User temporarily suspended via Report #" + id, "status", "RESOLVED"));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(Map.of("message", "Failed to suspend"));
         }
     }
 
@@ -708,7 +796,7 @@ public class AdminController {
                 offendingUser.setStatus("BANNED");
                 userRepository.save(offendingUser);
                 
-                // Notify user (via notification store + hypothetical email)
+                // Notify user
                 notificationService.createNotification(
                     "Your account has been BANNED due to severe or repeated violations. Contact support@mandala.io if you believe this is an error.",
                     "BAN",
@@ -717,12 +805,44 @@ public class AdminController {
                 );
             }
 
-            report.setStatus("RESOLVED_BY_BAN");
+            report.setStatus("RESOLVED");
+            report.setActionTaken("BAN");
             reportRepo.save(report);
             
-            return ResponseEntity.ok(Map.of("message", "User banned via Report #" + id, "status", "BANNED"));
+            return ResponseEntity.ok(Map.of("message", "User permanently banned via Report #" + id, "status", "RESOLVED"));
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(Map.of("message", "Failed to ban"));
+        }
+    }
+
+    @PutMapping("/reports/{id}/update")
+    public ResponseEntity<?> updateReport(@PathVariable Long id, @RequestBody Map<String, Object> body, @RequestHeader(value = "Authorization", required = false) String authHeader) {
+        User user = userService.getUserFromToken(authHeader);
+        if (!userService.isAdmin(user)) return org.springframework.http.ResponseEntity.status(org.springframework.http.HttpStatus.FORBIDDEN).body(Map.of("message", "Forbidden access"));
+        try {
+            Report report = reportRepo.findById(id).orElse(null);
+            if (report == null) return ResponseEntity.notFound().build();
+            
+            if (body.containsKey("status")) {
+                report.setStatus((String) body.get("status"));
+            }
+            if (body.containsKey("adminNotes")) {
+                report.setAdminNotes((String) body.get("adminNotes"));
+            }
+            if (body.containsKey("actionTaken")) {
+                report.setActionTaken((String) body.get("actionTaken"));
+            }
+            if (body.containsKey("reportedResponse")) {
+                report.setReportedResponse((String) body.get("reportedResponse"));
+            }
+            if (body.containsKey("reportedEvidence")) {
+                report.setReportedEvidence((String) body.get("reportedEvidence"));
+            }
+            
+            reportRepo.save(report);
+            return ResponseEntity.ok(Map.of("message", "Report #" + id + " updated successfully", "report", report));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(Map.of("message", "Failed to update report"));
         }
     }
 

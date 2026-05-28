@@ -1,6 +1,6 @@
-// src/user/pages/onboarding/OnboardingTeachSkills.jsx
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 import { useOnboarding } from "../../context/OnboardingContext";
 import { useToast } from "../../context/ToastContext";
 
@@ -84,8 +84,14 @@ const OnboardingTeachSkills = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-950 text-slate-50 px-4">
-      <div className="w-full max-w-xl bg-slate-900/80 border border-slate-700 rounded-3xl shadow-2xl p-8">
+    <div className="relative min-h-screen flex items-center justify-center bg-gradient-to-br from-[#0a0f1d] to-[#121829] text-white overflow-hidden">
+      {/* Simple Background with Corner Mandalas */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <img src={process.env.PUBLIC_URL + "/onboarding_teach_illustration_1779854532958.png"} alt="Mandala" className="absolute left-0 top-0 w-48 opacity-30" />
+        <img src={process.env.PUBLIC_URL + "/onboarding_teach_illustration_1779854532958.png"} alt="Mandala" className="absolute right-0 bottom-0 w-48 opacity-30 transform rotate-180" />
+      </div>
+
+      <div className="w-full max-w-xl bg-slate-900/40 backdrop-blur-xl border border-white/10 rounded-[32px] shadow-2xl p-8 relative z-10">
         <p className="text-xs text-slate-400 mb-2">Step 2 of 3</p>
         <h1 className="text-2xl font-bold mb-2">What can you teach?</h1>
         <p className="text-sm text-slate-400 mb-6">
@@ -138,9 +144,32 @@ const OnboardingTeachSkills = () => {
 
           {/* Teach Availability */}
           <div>
-            <label className="block text-xs font-semibold mb-1 mt-2">
-              When are you usually available to teach?
-            </label>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3 mt-2">
+              <label className="block text-xs font-semibold">
+                When are you usually available to teach?
+              </label>
+              
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Set all days:</span>
+                <select
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (val) {
+                      DAYS.forEach(day => handleAvailabilityChange(day, val));
+                    }
+                  }}
+                  className="px-2 py-1 rounded-xl bg-slate-950 border border-slate-700 text-xs focus:outline-none focus:ring-1 focus:ring-purple-500"
+                  defaultValue=""
+                >
+                  <option value="" disabled>Choose slot...</option>
+                  {TIME_SLOTS.map((t) => (
+                    <option key={t} value={t}>
+                      {t}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
 
             <div className="grid grid-cols-2 gap-4 text-xs">
               {DAYS.map((day) => (

@@ -1,8 +1,26 @@
 import axios from "axios";
 
+export const getBackendBase = () => {
+  if (process.env.REACT_APP_BACKEND_BASE_URL) {
+    return process.env.REACT_APP_BACKEND_BASE_URL;
+  }
+  return window.location.hostname === "localhost"
+    ? "http://localhost:8080"
+    : `${window.location.protocol}//${window.location.host}`;
+};
+
+export const getWsUrl = (token) => {
+  if (process.env.REACT_APP_WS_BASE_URL) {
+    return `${process.env.REACT_APP_WS_BASE_URL}?token=${token}`;
+  }
+  const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+  const host = window.location.hostname === "localhost" ? "localhost:8080" : window.location.host;
+  return `${protocol}//${host}/ws-chat?token=${token}`;
+};
+
 // Create centralized Axios instance
 const api = axios.create({
-  baseURL: "http://localhost:8080/api",
+  baseURL: `${getBackendBase()}/api`,
 });
 
 // Attach JWT token to requests

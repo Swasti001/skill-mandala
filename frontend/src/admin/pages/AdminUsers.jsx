@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import AdminNavbar from "../components/AdminNavbar";
 import { UserPlus, ChevronLeft, ChevronRight, MoreHorizontal, Pencil, Trash2, X, CheckCircle, AlertOctagon } from "lucide-react";
-import axios from "axios";
+import adminApi from "../adminApi";
 
 const statusStyles = {
   ACTIVE: "bg-emerald-500/15 text-emerald-300 border-emerald-500/20",
@@ -18,12 +18,9 @@ const AdminUsers = () => {
   const [formData, setFormData] = useState({ name: "", email: "", role: "USER", credits: 100, status: "ACTIVE" });
   const [toast, setToast] = useState(null);
 
-  const token = localStorage.getItem("adminToken");
-  const headers = { Authorization: `Bearer ${token}` };
-
   const fetchUsers = async () => {
     try {
-      const response = await axios.get("http://localhost:8080/api/admin/users", { headers });
+      const response = await adminApi.get("/admin/users");
       setUsers(response.data);
     } catch (err) {
       setError("Failed to fetch users list.");
@@ -50,7 +47,7 @@ const AdminUsers = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.put(`http://localhost:8080/api/admin/users/${selectedUser.id}`, formData, { headers });
+      await adminApi.put(`/admin/users/${selectedUser.id}`, formData);
       showToast("User updated successfully!");
       setIsModalOpen(false);
       fetchUsers();
@@ -62,7 +59,7 @@ const AdminUsers = () => {
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this user?")) return;
     try {
-      await axios.delete(`http://localhost:8080/api/admin/users/${id}`, { headers });
+      await adminApi.delete(`/admin/users/${id}`);
       showToast("User deleted.");
       fetchUsers();
     } catch (err) {

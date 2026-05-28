@@ -9,6 +9,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import jakarta.annotation.PostConstruct;
 import io.jsonwebtoken.Jwts;
+import org.springframework.beans.factory.annotation.Value;
 import jakarta.servlet.http.HttpServletRequest;
 
 @Service
@@ -19,6 +20,9 @@ public class UserService {
     
     @Autowired
     private UserOnboardingRepository onboardingRepo;
+
+    @Value("${jwt.secret:SkillMandalaSuperSecretKeySkillMandalaSuperSecretKeySkillMandala123}")
+    private String jwtSecret;
 
     private BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
@@ -100,7 +104,7 @@ public class UserService {
         if (authHeader == null || !authHeader.startsWith("Bearer ")) return null;
         try {
             String token = authHeader.substring(7);
-            String secret = "SkillMandalaSuperSecretKeySkillMandalaSuperSecretKeySkillMandala123";
+            String secret = jwtSecret;
             String username = Jwts.parserBuilder()
                     .setSigningKey(io.jsonwebtoken.security.Keys.hmacShaKeyFor(secret.getBytes()))
                     .build()

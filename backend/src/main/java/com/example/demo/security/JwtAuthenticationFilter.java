@@ -42,11 +42,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     // Optimized lookup
                     User user = userRepository.findFirstByUsername(username).orElse(null);
                     
-                    if (user != null && "BANNED".equals(user.getStatus())) {
-                        System.out.println("[Security] Blocked banned user: " + username);
+                    if (user != null && ("BANNED".equals(user.getStatus()) || "SUSPENDED".equals(user.getStatus()))) {
+                        System.out.println("[Security] Blocked restricted user: " + username + " (Status: " + user.getStatus() + ")");
                         response.setStatus(HttpServletResponse.SC_FORBIDDEN);
                         response.setContentType("application/json");
-                        response.getWriter().write("{\"message\": \"Your account has been banned for community violations.\"}");
+                        response.getWriter().write("{\"message\": \"Your account is restricted. Please contact support.\"}");
                         return;
                     }
 

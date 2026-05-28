@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import AdminNavbar from "../components/AdminNavbar";
 import { User, Shield, Sparkles, Bell, AlertTriangle, Eye, Link, Bold, Italic, PenLine, CheckCircle, AlertOctagon } from "lucide-react";
-import axios from "axios";
+import adminApi from "../adminApi";
 
 const Switch = ({ checked, onChange }) => (
   <button
@@ -42,9 +42,6 @@ const AdminSettings = () => {
   const [toast, setToast] = useState(null);
   const [saving, setSaving] = useState(false);
 
-  const token = localStorage.getItem("adminToken");
-  const headers = { Authorization: `Bearer ${token}` };
-
   const showToast = (message, type = "success") => {
     setToast({ message, type });
     setTimeout(() => setToast(null), 3000);
@@ -52,7 +49,7 @@ const AdminSettings = () => {
 
   const fetchSettings = async () => {
     try {
-      const res = await axios.get("http://localhost:8080/api/admin/settings", { headers });
+      const res = await adminApi.get("/admin/settings");
       setSettings(res.data);
       setConfig({
         platformName: res.data.platformName,
@@ -86,7 +83,7 @@ const AdminSettings = () => {
   const handleSave = async () => {
     setSaving(true);
     try {
-      const res = await axios.put("http://localhost:8080/api/admin/settings", { ...config }, { headers });
+      const res = await adminApi.put("/admin/settings", { ...config });
       showToast(res.data.message, "success");
     } catch (err) {
       showToast("Failed to save settings", "error");

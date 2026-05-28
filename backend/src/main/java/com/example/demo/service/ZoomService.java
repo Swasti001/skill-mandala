@@ -29,6 +29,9 @@ public class ZoomService {
     @Value("${zoom.account.id}")
     private String accountId;
 
+    @Value("${zoom.user.email:np03cs4a230502@heraldcollege.edu.np}")
+    private String zoomUserEmail;
+
     private final String zoomApiUrl = "https://api.zoom.us/v2";
 
     public ZoomService(ZoomMeetingRepository zoomRepo, SessionRepository sessionRepo) {
@@ -55,7 +58,7 @@ public class ZoomService {
             throw new RuntimeException("Failed to authenticate with Zoom. Check your Server-to-Server credentials.");
         }
 
-        String url = zoomApiUrl + "/users/np03cs4a230502@heraldcollege.edu.np/meetings";
+        String url = zoomApiUrl + "/users/" + zoomUserEmail + "/meetings";
 
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(token);

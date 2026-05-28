@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
+import api from "../api";
 
 const ResetPasswordPage = () => {
   const [searchParams] = useSearchParams();
@@ -42,19 +43,10 @@ const ResetPasswordPage = () => {
     setError("");
 
     try {
-      const res = await fetch("http://localhost:8080/api/auth/reset-password", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token, newPassword }),
-      });
-      const data = await res.json();
-      if (res.ok) {
-        setSuccess(true);
-      } else {
-        setError(data.message || "Reset failed.");
-      }
+      await api.post("/auth/reset-password", { token, newPassword });
+      setSuccess(true);
     } catch (err) {
-      setError("Network error. Try again.");
+      setError(err.response?.data?.message || "Reset failed.");
     } finally {
       setLoading(false);
     }

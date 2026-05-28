@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import adminApi from "../adminApi";
+import Logo from "../../user/components/Logo";
 
 const AdminLogin = () => {
   const [email, setEmail] = useState("");
@@ -13,7 +14,7 @@ const AdminLogin = () => {
     setError("");
 
     try {
-      const response = await axios.post("http://localhost:8080/api/auth/admin-login", {
+      const response = await adminApi.post("/auth/admin-login", {
         email,
         password
       });
@@ -35,7 +36,10 @@ const AdminLogin = () => {
         onSubmit={handleLogin}
         className="bg-slate-900 border border-slate-800 rounded-2xl p-8 w-96 flex flex-col gap-4 shadow-xl"
       >
-        <h2 className="text-2xl font-semibold text-slate-50 text-center">Admin Login</h2>
+        <div className="flex justify-center mb-2">
+          <Logo className="w-12 h-12" showText={true} />
+        </div>
+        <h2 className="text-xl font-semibold text-slate-50 text-center tracking-tight">Admin Console Login</h2>
 
         {error && (
           <div className="bg-red-500/10 border border-red-500/50 text-red-500 text-sm p-3 rounded-lg text-center">

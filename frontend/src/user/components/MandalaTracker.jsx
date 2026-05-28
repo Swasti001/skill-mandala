@@ -3,7 +3,7 @@ import api from "../api";
 import { motion } from "framer-motion";
 import { Sparkles, Info } from "lucide-react";
 
-const MandalaTracker = () => {
+const MandalaTracker = ({ streak = 0, teachingHours = 0, learningHours = 0, completedGoals = 0 }) => {
   const daysInMonth = 31;
   const habits = ["Coding", "Teaching", "Reading", "Meditation"];
   const numRings = habits.length;
@@ -114,8 +114,7 @@ const MandalaTracker = () => {
         <path
           key={`seg-${d}-${h}`}
           d={describeArc(cx, cy, rInner, rOuter, startAngle, endAngle)}
-          className={`${fillColor} ${opacity} stroke-white/20 stroke-[0.5px] transition-all duration-300 cursor-pointer`}
-          onClick={() => toggleSegment(d, h)}
+          className={`${fillColor} ${isFilled ? "opacity-80" : "opacity-0"} stroke-white/20 stroke-[0.5px] transition-all duration-300`}
         />
       );
     }
@@ -200,6 +199,17 @@ const MandalaTracker = () => {
                 </div>
               );
             })}
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4 border-t border-white/5 pt-6">
+          <div className="p-4 bg-white/5 rounded-2xl border border-white/5">
+             <p className="text-[10px] font-black uppercase tracking-widest text-slate-500">Current Streak</p>
+             <p className="text-xl font-black text-white mt-1">{streak} Days</p>
+          </div>
+          <div className="p-4 bg-white/5 rounded-2xl border border-white/5">
+             <p className="text-[10px] font-black uppercase tracking-widest text-slate-500">Weaving Sessions</p>
+             <p className="text-xl font-black text-white mt-1">{teachingHours + learningHours} Sessions</p>
           </div>
         </div>
 

@@ -33,10 +33,28 @@ public class Report {
     private String color; // red, purple, gray
 
     @Column(nullable = false)
-    private String status; // PENDING, RESOLVED
+    private String status; // PENDING, UNDER_REVIEW, RESOLVED, REJECTED
 
     @Column(nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
+
+    @Column(name = "related_entity", columnDefinition = "TEXT")
+    private String relatedEntity;
+
+    @Column(name = "reported_response", columnDefinition = "TEXT")
+    private String reportedResponse;
+
+    @Column(name = "reporter_evidence", columnDefinition = "TEXT")
+    private String reporterEvidence;
+
+    @Column(name = "reported_evidence", columnDefinition = "TEXT")
+    private String reportedEvidence;
+
+    @Column(name = "admin_notes", columnDefinition = "TEXT")
+    private String adminNotes;
+
+    @Column(name = "action_taken", columnDefinition = "varchar(255) default 'NONE'")
+    private String actionTaken = "NONE";
 
     public Report() {}
 
@@ -86,4 +104,22 @@ public class Report {
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+
+    public String getRelatedEntity() { return relatedEntity; }
+    public void setRelatedEntity(String relatedEntity) { this.relatedEntity = relatedEntity; }
+
+    public String getReportedResponse() { return reportedResponse; }
+    public void setReportedResponse(String reportedResponse) { this.reportedResponse = reportedResponse; }
+
+    public String getReporterEvidence() { return reporterEvidence; }
+    public void setReporterEvidence(String reporterEvidence) { this.reporterEvidence = reporterEvidence; }
+
+    public String getReportedEvidence() { return reportedEvidence; }
+    public void setReportedEvidence(String reportedEvidence) { this.reportedEvidence = reportedEvidence; }
+
+    public String getAdminNotes() { return adminNotes; }
+    public void setAdminNotes(String adminNotes) { this.adminNotes = adminNotes; }
+
+    public String getActionTaken() { return actionTaken; }
+    public void setActionTaken(String actionTaken) { this.actionTaken = actionTaken; }
 }

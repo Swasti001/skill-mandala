@@ -6,10 +6,10 @@ const UserContext = createContext();
 export const UserProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
-    const userId = localStorage.getItem('userId');
-    const token = localStorage.getItem('token');
 
     const fetchUser = useCallback(async () => {
+        const userId = localStorage.getItem('userId');
+        const token = localStorage.getItem('token');
         if (!userId || !token) {
             setLoading(false);
             return;
@@ -26,20 +26,40 @@ export const UserProvider = ({ children }) => {
         } finally {
             setLoading(false);
         }
-    }, [userId, token]);
+    }, []);
 
     useEffect(() => {
         fetchUser();
     }, [fetchUser]);
 
-    const refreshUser = useCallback(() => {
-        fetchUser();
-    }, [fetchUser]);
+    const refreshUser = useCallback(async () => {
+        const userId = localStorage.getItem('userId');
+        const token = localStorage.getItem('token');
+        if (!userId || !token) {
+            setUser(null);
+            setLoading(false);
+            return;
+        }
+        try {
+            setLoading(true);
+            const res = await api.get('/user/me');
+            setUser(res.data);
+        } catch (err) {
+            console.error('Failed to refresh user:', err);
+            if (err.response?.status === 401) {
+                setUser(null);
+            }
+        } finally {
+            setLoading(false);
+        }
+    }, []);
 
     const logout = () => {
         localStorage.removeItem('token');
         localStorage.removeItem('userId');
         localStorage.removeItem('user');
+        localStorage.removeItem('onboardingCompleted');
+        localStorage.removeItem('currentOnboardingStep');
         setUser(null);
     };
 

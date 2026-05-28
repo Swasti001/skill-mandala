@@ -37,7 +37,6 @@ public class AppConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(
                     "/api/auth/**",
-                    "/api/user/onboarding/**",
                     "/uploads/**",
                     "/ws-chat/**",
                     "/error"

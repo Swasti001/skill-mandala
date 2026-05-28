@@ -1,11 +1,15 @@
 import React, { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
-import Logo from "../components/Logo";
+import { Eye, EyeOff } from "lucide-react";
 import api from "../api";
+import Logo from "../components/Logo";
 import { useToast } from "../context/ToastContext";
+import { useUser } from "../../context/UserContext";
+
 
 const UserLoginPage = ({ setIsAuthenticated }) => {
+  const { setUser, refreshUser } = useUser();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -20,6 +24,12 @@ const UserLoginPage = ({ setIsAuthenticated }) => {
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
+    // Clear stale cached/localStorage user data before login
+    localStorage.removeItem("token");
+    localStorage.removeItem("userId");
+    localStorage.removeItem("user");
+    localStorage.removeItem("onboardingCompleted");
+    localStorage.removeItem("currentOnboardingStep");
     try {
       const response = await api.post("/auth/login", { email, password });
       const data = response.data;
@@ -41,6 +51,7 @@ const UserLoginPage = ({ setIsAuthenticated }) => {
       localStorage.setItem("token", data.token);
       localStorage.setItem("userId", data.user.id);
       localStorage.setItem("user", JSON.stringify(data.user));
+      setUser(data.user);
 
       // Store onboarding info
       localStorage.setItem("onboardingCompleted", data.onboarding.completed ? "true" : "false");
@@ -48,6 +59,9 @@ const UserLoginPage = ({ setIsAuthenticated }) => {
 
       setIsAuthenticated(true);
       showToast("Welcome to Skill Mandala! 🌟");
+
+      // Fetch full user details from backend immediately
+      await refreshUser();
 
       if (data.onboarding.completed) {
         navigate(from, { replace: true });
@@ -195,9 +209,9 @@ const UserLoginPage = ({ setIsAuthenticated }) => {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-purple-400 hover:text-purple-300 text-xs font-semibold"
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-purple-400 hover:text-purple-300"
                 >
-                  {showPassword ? "Hide" : "Show"}
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
               </div>
             </div>

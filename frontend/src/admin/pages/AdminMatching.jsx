@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import AdminNavbar from "../components/AdminNavbar";
 import { ListFilter, CheckCircle, AlertOctagon, ArrowRight, Activity, Users, Layers, Filter, Clock, CheckCircle2, History } from "lucide-react";
-import axios from "axios";
+import adminApi from "../adminApi";
 
 const statusStyles = {
   ONGOING: "bg-fuchsia-500/15 text-fuchsia-300 border-fuchsia-500/20",
@@ -18,12 +18,9 @@ const AdminMatching = () => {
   const [error, setError] = useState("");
   const [stats, setStats] = useState({ ongoing: 0, completed: 0, pending: 0 });
 
-  const token = localStorage.getItem("adminToken");
-  const headers = { Authorization: `Bearer ${token}` };
-
   const fetchRealMatches = async () => {
     try {
-      const response = await axios.get("http://localhost:8080/api/admin/sessions", { headers });
+      const response = await adminApi.get("/admin/sessions");
       const data = response.data.sessions || [];
       setSessions(data);
       setFilteredSessions(data);

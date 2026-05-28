@@ -62,6 +62,16 @@ public class ReportController {
                 "PENDING"
             );
 
+            if (body.containsKey("relatedEntity") && body.get("relatedEntity") != null) {
+                report.setRelatedEntity((String) body.get("relatedEntity"));
+            } else {
+                report.setRelatedEntity("User Profile of Reported User");
+            }
+
+            if (body.containsKey("reporterEvidence") && body.get("reporterEvidence") != null) {
+                report.setReporterEvidence((String) body.get("reporterEvidence"));
+            }
+
             reportRepository.save(report);
 
             return ResponseEntity.ok(Map.of(

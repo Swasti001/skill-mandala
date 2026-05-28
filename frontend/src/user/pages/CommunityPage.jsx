@@ -8,7 +8,7 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
-import api from "../api";
+import api, { getBackendBase } from "../api";
 import Avatar from "../components/Avatar";
 
 const CommunityPage = () => {
@@ -34,7 +34,7 @@ const CommunityPage = () => {
   const currentUserId = user?.id;
   const displayName = user?.name || user?.username || "You";
 
-  const BACKEND_BASE = "http://localhost:8080";
+  const BACKEND_BASE = getBackendBase();
 
   const SIDEBAR_LINKS = [
     { id: "feed",    name: t('home_feed'),    icon: BookOpen },

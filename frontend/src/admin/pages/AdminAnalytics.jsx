@@ -1,15 +1,12 @@
 import React, { useState, useEffect } from "react";
 import AdminNavbar from "../components/AdminNavbar";
 import { TrendingUp, MoreHorizontal, Download, Share2, Search, TriangleAlert, Activity, Network, CheckCircle, AlertOctagon, RefreshCw } from "lucide-react";
-import axios from "axios";
+import adminApi from "../adminApi";
 
 const AdminAnalytics = () => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState(null);
-
-  const token = localStorage.getItem("adminToken");
-  const headers = { Authorization: `Bearer ${token}` };
 
   const showToast = (message, type = "success") => {
     setToast({ message, type });
@@ -18,7 +15,7 @@ const AdminAnalytics = () => {
 
   const fetchAnalytics = async () => {
     try {
-      const res = await axios.get("http://localhost:8080/api/admin/analytics", { headers });
+      const res = await adminApi.get("/admin/analytics");
       setData(res.data);
       setLoading(false);
     } catch (err) {

@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
-import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
 import { Zap, Brain, Sparkles, Target, ArrowRight, ShieldCheck, Users } from "lucide-react";
 import UserLandingNavbar from "../components/UserLandingNavbar";
@@ -26,7 +25,6 @@ const FeatureCard = ({ icon: Icon, title, description, delay }) => (
 );
 
 const UserLandingPage = () => {
-  const { t } = useTranslation();
   const isAuthenticated = !!localStorage.getItem("token");
 
   return (
@@ -35,9 +33,91 @@ const UserLandingPage = () => {
 
       {/* Hero Section */}
       <div className="relative min-h-screen flex flex-col items-center justify-center px-6 pt-32 pb-20 text-center">
-        {/* Background Ambient Glows */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-indigo-600/20 rounded-full blur-[120px] -z-10 pointer-events-none mix-blend-screen" />
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-rose-500/10 rounded-full blur-[100px] -z-10 pointer-events-none" />
+      {/* Classy Geometric Background Layer */}
+      <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden bg-[#020617]">
+        {/* Soft elegant radial gradient for depth */}
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_40%,#0f172a_0%,#020617_100%)] opacity-80" />
+        
+        {/* Slowly Revolving Ultra-Fine Mandala Ring */}
+        <motion.div 
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] opacity-15"
+          animate={{ rotate: 360 }}
+          transition={{ duration: 200, repeat: Infinity, ease: "linear" }}
+        >
+          <svg viewBox="0 0 1000 1000" className="w-full h-full stroke-indigo-400/20">
+            {/* Concentric rings */}
+            {[100, 200, 300, 400, 450].map((r, i) => (
+              <circle 
+                key={`ring-${i}`} 
+                cx="500" 
+                cy="500" 
+                r={r} 
+                className="fill-none stroke-[0.5px]" 
+                strokeDasharray={i % 2 === 0 ? "6 6" : "none"} 
+              />
+            ))}
+            
+            {/* Fine geometric flower of life / mandala petals */}
+            {[...Array(12)].map((_, i) => (
+              <circle
+                key={`petal-ring-${i}`}
+                cx={500 + 200 * Math.cos((i * Math.PI) / 6)}
+                cy={500 + 200 * Math.sin((i * Math.PI) / 6)}
+                r="200"
+                className="fill-none stroke-[0.3px]"
+              />
+            ))}
+
+            {/* Radial dividing segments */}
+            {[...Array(24)].map((_, i) => (
+              <line
+                key={`radial-${i}`}
+                x1="500"
+                y1="500"
+                x2={500 + 480 * Math.cos((i * Math.PI) / 12)}
+                y2={500 + 480 * Math.sin((i * Math.PI) / 12)}
+                className="stroke-[0.3px]"
+              />
+            ))}
+          </svg>
+        </motion.div>
+
+        {/* Second smaller offsetting outer ring */}
+        <motion.div 
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1200px] h-[1200px] opacity-10"
+          animate={{ rotate: -360 }}
+          transition={{ duration: 320, repeat: Infinity, ease: "linear" }}
+        >
+          <svg viewBox="0 0 1000 1000" className="w-full h-full stroke-cyan-400/20">
+            <circle cx="500" cy="500" r="480" className="fill-none stroke-[0.8px]" strokeDasharray="15 30" />
+            {[...Array(16)].map((_, i) => (
+              <circle
+                key={`outer-petal-${i}`}
+                cx={500 + 350 * Math.cos((i * Math.PI) / 8)}
+                cy={500 + 350 * Math.sin((i * Math.PI) / 8)}
+                r="150"
+                className="fill-none stroke-[0.3px]"
+              />
+            ))}
+          </svg>
+        </motion.div>
+
+        {/* Subtle, classy star nodes */}
+        <div className="absolute inset-0 opacity-10">
+          {[...Array(16)].map((_, i) => (
+            <div
+              key={`star-${i}`}
+              className="absolute rounded-full bg-indigo-300"
+              style={{
+                width: '1.5px',
+                height: '1.5px',
+                left: `${[8, 24, 38, 74, 85, 94, 6, 20, 52, 65, 80, 92, 15, 45, 58, 88][i]}%`,
+                top: `${[15, 60, 80, 20, 55, 75, 40, 88, 8, 35, 68, 84, 95, 12, 48, 90][i]}%`,
+              }}
+            />
+          ))}
+        </div>
+      </div>
 
         <div className="relative z-10 space-y-8 max-w-5xl mx-auto">
           <motion.div 

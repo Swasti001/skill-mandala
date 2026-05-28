@@ -10,18 +10,18 @@ import {
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
+import { useUser } from "../../context/UserContext";
 import Avatar from "../components/Avatar";
 import MandalaTracker from "../components/MandalaTracker";
 
 const UserDashboard = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { user, loading: authLoading } = useUser();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   
-  const userId = localStorage.getItem("userId");
-  const userJson = localStorage.getItem("user");
-  const localUser = userJson ? JSON.parse(userJson) : null;
+  const userId = user?.id;
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -41,17 +41,6 @@ const UserDashboard = () => {
     }
   }, [userId]);
 
-  if (loading) {
-    return (
-      <div className="w-full min-h-[80vh] flex flex-col items-center justify-center text-white">
-        <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 2, ease: "linear" }}>
-          <Loader2 className="w-16 h-16 text-indigo-400 opacity-20" />
-        </motion.div>
-        <p className="text-[10px] font-black uppercase tracking-[0.5em] text-slate-500 mt-8 animate-pulse">Neural Synchronization in Progress...</p>
-      </div>
-    );
-  }
-
   const { 
     stats = {}, 
     recentMatches = [], 
@@ -61,12 +50,20 @@ const UserDashboard = () => {
     notifications = [], 
     badges = [] 
   } = data || {};
-  const displayName = localUser?.name || "Weaver";
+  const displayName = user?.name || null;
 
   // Identify "Live" session (Today)
   const liveSession = todaySessions?.[0]; // Strategy: Most immediate session for today
   const agendaSessions = todaySessions || [];
   const futureSessions = upcomingSessions || [];
+
+  if (authLoading || loading || !user) {
+    return (
+      <div className="flex items-center justify-center h-16 bg-[#0B101E]">
+        <div className="w-4 h-4 border-2 border-t-2 border-indigo-500 rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="w-full max-w-7xl mx-auto px-6 py-10 space-y-12 pb-32 text-left">
@@ -75,7 +72,7 @@ const UserDashboard = () => {
       <header className="flex flex-col lg:flex-row lg:items-center justify-between gap-10 bg-[#12182B]/40 backdrop-blur-2xl border border-white/5 rounded-[40px] p-10 relative overflow-hidden group">
          <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-indigo-500/5 blur-[100px] rounded-full -z-10" />
          <div className="flex items-center gap-8 relative z-10">
-            <Avatar src={localUser?.profilePictureUrl} name={displayName} size="xl" border={true} className="rounded-3xl shadow-2xl scale-110" />
+            <Avatar src={user?.profilePictureUrl} name={displayName} size="xl" border={true} className="rounded-3xl shadow-2xl scale-110" />
             <div className="space-y-3">
                <h1 className="text-4xl font-black text-white tracking-tighter leading-none inline-flex items-center gap-3">
                   {displayName} <ShieldCheck className="text-indigo-400" size={24} />

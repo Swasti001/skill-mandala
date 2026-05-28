@@ -56,7 +56,8 @@ public class AuthController {
                     "user", Map.of(
                             "id", savedUser.getId(),
                             "username", savedUser.getUsername(),
-                            "email", savedUser.getEmail()
+                            "email", savedUser.getEmail(),
+                            "name", savedUser.getName() != null ? savedUser.getName() : ""
                     ),
                     "onboarding", Map.of(
                             "completed", false,
@@ -94,10 +95,14 @@ public class AuthController {
                         .body(Map.of("message", "Invalid password"));
             }
 
-            // check if user is banned
+            // check if user is banned or suspended
             if ("BANNED".equals(existingUser.getStatus())) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN)
                         .body(Map.of("message", "Your account has been banned for community violations. Please contact support."));
+            }
+            if ("SUSPENDED".equals(existingUser.getStatus())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body(Map.of("message", "Your account has been temporarily suspended. Please contact support."));
             }
 
             // Generate JWT
@@ -124,7 +129,8 @@ public class AuthController {
                             "id", existingUser.getId(),
                             "username", existingUser.getUsername(),
                             "email", existingUser.getEmail(),
-                            "role", existingUser.getRole()
+                            "role", existingUser.getRole(),
+                            "name", existingUser.getName() != null ? existingUser.getName() : ""
                     ),
                     "onboarding", Map.of(
                             "completed", isCompleted,
@@ -166,6 +172,10 @@ public class AuthController {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN)
                         .body(Map.of("message", "This account has been banned."));
             }
+            if ("SUSPENDED".equals(existingUser.getStatus())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body(Map.of("message", "This account has been temporarily suspended."));
+            }
 
             String token = jwtUtils.generateToken(existingUser.getId(), existingUser.getUsername());
 
@@ -175,7 +185,8 @@ public class AuthController {
                             "id", existingUser.getId(),
                             "username", existingUser.getUsername(),
                             "email", existingUser.getEmail(),
-                            "role", existingUser.getRole()
+                            "role", existingUser.getRole(),
+                            "name", existingUser.getName() != null ? existingUser.getName() : ""
                     )
             ));
 

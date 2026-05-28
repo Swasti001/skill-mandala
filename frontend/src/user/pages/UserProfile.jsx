@@ -290,14 +290,16 @@ const UserProfile = () => {
     }
   };
 
-  if (loading) return (
-    <div className="w-full min-h-[60vh] flex flex-col items-center justify-center text-white">
-      <RefreshCw className="w-10 h-10 text-indigo-400 animate-spin mb-4" />
-      <p className="text-[10px] uppercase font-black tracking-widest opacity-40">Syncing Mandala...</p>
-    </div>
-  );
+  if (loading || !user) {
+    return (
+      <div className="w-full min-h-[60vh] flex flex-col items-center justify-center text-white">
+        <Loader2 className="w-10 h-10 text-indigo-400 animate-spin mb-4" />
+        <p className="text-[10px] uppercase font-black tracking-widest opacity-40">Syncing Mandala...</p>
+      </div>
+    );
+  }
 
-  const displayName = user?.name || user?.username || "Weaver";
+  const displayName = user?.name || user?.username || null;
 
   return (
     <div className="w-full max-w-[1240px] mx-auto text-slate-100 flex flex-col gap-6 pt-6 px-6 pb-24 relative z-10 text-left overflow-hidden">
@@ -339,82 +341,139 @@ const UserProfile = () => {
         </motion.div>
 
         <div className="px-6 lg:px-12 -mt-24 relative z-10">
-           <div className="glassmorphism rounded-[3.5rem] p-10 border border-white/5 shadow-2xl flex flex-col lg:flex-row items-center lg:items-end justify-between gap-10">
-              <div className="flex flex-col lg:flex-row items-center lg:items-end gap-8">
-                 <div className="relative group p-1 rounded-[2.8rem] bg-gradient-to-br from-indigo-500 to-purple-500 shadow-2xl">
-                    <Avatar src={user?.profilePictureUrl} name={displayName} size="xxl" className="rounded-[2.6rem] border-8 border-[#0B1224]" border={false} />
-                    {isOwner && (
-                        <>
-                            {uploadingAvatar ? (
-                                <div className="absolute inset-0 bg-black/60 rounded-[2.6rem] flex items-center justify-center"><Loader2 className="animate-spin text-white" /></div>
-                            ) : (
-                                <button onClick={() => fileInputRef.current.click()} className="absolute inset-2 bg-black/40 rounded-[2.5rem] opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white backdrop-blur-sm border-2 border-white/20">
-                                <Camera size={24} />
-                                </button>
-                            )}
-                            <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept="image/*" />
-                        </>
-                    )}
-                 </div>
-                 <div className="text-center lg:text-left space-y-3 pb-2">
-                    {isEditMode ? (
-                        <input value={editName} onChange={e => setEditName(e.target.value)} className="bg-white/5 border border-white/10 p-2 rounded-xl text-3xl font-black italic italic tracking-tighter text-white" />
-                    ) : (
-                        <h1 className="text-4xl lg:text-5xl font-black text-white italic tracking-tighter leading-none">{displayName}</h1>
-                    )}
-                    <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4 text-slate-400 text-sm font-bold uppercase tracking-widest">
-                       <span className="flex items-center gap-2">@{user?.username}</span>
-                       <div className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
-                       <span className="flex items-center gap-2"><MapPin size={16} /> Mandala Global</span>
+           <div className="glassmorphism rounded-[3.5rem] p-10 border border-white/5 shadow-2xl">
+              <div className="flex flex-col lg:flex-row items-center lg:items-start justify-between gap-8">
+                 <div className="flex flex-col lg:flex-row items-center lg:items-start gap-8">
+                    <div className="relative group p-1 rounded-[2.8rem] bg-gradient-to-br from-indigo-500 to-purple-500 shadow-2xl shrink-0">
+                       <Avatar src={user?.profilePictureUrl} name={displayName} size="xxl" className="rounded-[2.6rem] border-8 border-[#0B1224]" border={false} />
+                       {isOwner && (
+                           <>
+                               {uploadingAvatar ? (
+                                   <div className="absolute inset-0 bg-black/60 rounded-[2.6rem] flex items-center justify-center"><Loader2 className="animate-spin text-white" /></div>
+                               ) : (
+                                   <button onClick={() => fileInputRef.current.click()} className="absolute inset-2 bg-black/40 rounded-[2.5rem] opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white backdrop-blur-sm border-2 border-white/20">
+                                   <Camera size={24} />
+                                   </button>
+                               )}
+                               <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept="image/*" />
+                           </>
+                       )}
+                    </div>
+                    <div className="text-center lg:text-left space-y-3 flex-1 min-w-0">
+                       {isEditMode ? (
+                           <input value={editName} onChange={e => setEditName(e.target.value)} className="bg-white/5 border border-white/10 p-2 rounded-xl text-3xl font-black italic tracking-tighter text-white w-full" />
+                       ) : (
+                           <h1 className="text-4xl lg:text-5xl font-black text-white italic tracking-tighter leading-none">{displayName}</h1>
+                       )}
+                       <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4 text-slate-400 text-sm font-bold uppercase tracking-widest">
+                          <span className="flex items-center gap-2">@{user?.username}</span>
+                          <div className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
+                          <span className="flex items-center gap-2"><MapPin size={16} /> Mandala Global</span>
+                       </div>
+
+                       {/* Bio inline */}
+                       <div className="pt-3">
+                         {isEditMode ? (
+                             <textarea value={editBio} onChange={e => setEditBio(e.target.value)} rows={2} className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-[14px] font-medium text-slate-300 leading-relaxed focus:border-indigo-500 focus:outline-none transition-all resize-none" placeholder="Write your bio..." />
+                         ) : (
+                             <p className="text-[14px] font-medium text-slate-400 leading-relaxed">{onboarding?.bio || "No bio added yet."}</p>
+                         )}
+                       </div>
+
+                       {/* Contact info inline */}
+                       <div className="flex flex-wrap items-center gap-6 pt-2">
+                         {isEditMode ? (
+                           <>
+                             <div className="flex items-center gap-2">
+                               <Mail size={14} className="text-indigo-400 opacity-60" />
+                               <input value={editEmail} onChange={e => setEditEmail(e.target.value)} className="bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-[12px] text-white focus:border-indigo-500 focus:outline-none w-[200px]" placeholder="Email" />
+                             </div>
+                             <div className="flex items-center gap-2">
+                               <Phone size={14} className="text-indigo-400 opacity-60" />
+                               <input value={editPhone} onChange={e => setEditPhone(e.target.value)} className="bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-[12px] text-white focus:border-indigo-500 focus:outline-none w-[160px]" placeholder="Phone" />
+                             </div>
+                           </>
+                         ) : (
+                           <>
+                             <span className="flex items-center gap-2 text-slate-400 text-[13px] font-medium">
+                               <Mail size={14} className="text-indigo-400 opacity-60" />
+                               {user?.email || "No email"}
+                             </span>
+                             <span className="flex items-center gap-2 text-slate-400 text-[13px] font-medium">
+                               <Phone size={14} className="text-indigo-400 opacity-60" />
+                               {user?.phone || "No phone"}
+                             </span>
+                           </>
+                         )}
+                       </div>
+
+                       {/* Mandala Wisdom inline */}
+                       <div className="flex flex-wrap items-center gap-6 pt-4 border-t border-white/5 mt-2">
+                         <div className="flex items-center gap-2">
+                           <div className="flex gap-0.5">
+                             {[1, 2, 3, 4, 5].map(star => (
+                               <Star key={star} size={12} fill={star <= (user?.teachingReputation || 5) ? "#10b981" : "none"} className={star <= (user?.teachingReputation || 5) ? "text-emerald-500" : "text-slate-800"} />
+                             ))}
+                           </div>
+                           <span className="text-[11px] font-black text-emerald-400">{user?.teachingReputation?.toFixed(1) || "5.0"}</span>
+                           <span className="text-[9px] text-slate-500 font-bold uppercase tracking-widest">Guide</span>
+                         </div>
+                         <div className="flex items-center gap-2">
+                           <div className="flex gap-0.5">
+                             {[1, 2, 3, 4, 5].map(star => (
+                               <Star key={star} size={12} fill={star <= (user?.learningReputation || 5) ? "#6366f1" : "none"} className={star <= (user?.learningReputation || 5) ? "text-indigo-500" : "text-slate-800"} />
+                             ))}
+                           </div>
+                           <span className="text-[11px] font-black text-indigo-400">{user?.learningReputation?.toFixed(1) || "5.0"}</span>
+                           <span className="text-[9px] text-slate-500 font-bold uppercase tracking-widest">Seeker</span>
+                         </div>
+                         <div className="flex items-center gap-2">
+                           <span className="text-[11px] font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-emerald-400">
+                             {(((user?.teachingReputation || 5) + (user?.learningReputation || 5)) / 2).toFixed(1)}
+                           </span>
+                           <span className="text-[9px] text-slate-500 font-bold uppercase tracking-widest">Resonance</span>
+                         </div>
+                       </div>
                     </div>
                  </div>
-              </div>
-              <div className="flex items-center gap-4 pb-2">
-                {!isOwner ? (
-                <>
-                    <button 
-                        onClick={handleConnect} 
-                        disabled={saving || connectionStatus === "MATCHED" || connectionStatus === "REQUEST_SENT"}
-                        className={`px-10 py-5 rounded-2xl font-black uppercase text-[12px] tracking-widest shadow-xl flex items-center gap-3 transition-all active:scale-95 ${
-                            connectionStatus === "MATCHED" 
-                            ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/30" 
-                            : connectionStatus === "REQUEST_SENT"
-                            ? "bg-slate-800 text-slate-500 border border-slate-700 opacity-60"
-                            : "bg-indigo-600 hover:bg-indigo-700 text-white"
-                        }`}
-                    >
-                        {connectionStatus === "MATCHED" ? <><Award size={18} /> Matched</> : connectionStatus === "REQUEST_SENT" ? <><RefreshCw size={18} /> Request Sent</> : <><UserPlus size={18} /> Connect</>}
-                    </button>
-                    {!isOwner && (
-                        <button 
-                            onClick={() => setIsReportModalOpen(true)}
-                            className="p-5 bg-rose-500/10 text-rose-500 rounded-2xl border border-rose-500/20 hover:bg-rose-500/20 transition-all flex items-center justify-center shadow-xl"
-                            title="Report User"
-                        >
-                            <AlertOctagon size={20} />
-                        </button>
-                    )}
-                </>
-              ) : isEditMode && (
-                <button onClick={handleSaveProfile} disabled={saving} className="px-10 py-5 bg-indigo-600 text-white rounded-2xl font-black uppercase tracking-widest shadow-xl flex items-center gap-3 active:scale-95 transition-all">
-                    {saving ? <Loader2 className="animate-spin" size={18} /> : <Save size={18} />} Synchronize
-                </button>
-              )}
+                 <div className="flex items-center gap-4 shrink-0 pt-2">
+                   {!isOwner ? (
+                   <>
+                       <button 
+                           onClick={handleConnect} 
+                           disabled={saving || connectionStatus === "MATCHED" || connectionStatus === "REQUEST_SENT"}
+                           className={`px-10 py-5 rounded-2xl font-black uppercase text-[12px] tracking-widest shadow-xl flex items-center gap-3 transition-all active:scale-95 ${
+                               connectionStatus === "MATCHED" 
+                               ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/30" 
+                               : connectionStatus === "REQUEST_SENT"
+                               ? "bg-slate-800 text-slate-500 border border-slate-700 opacity-60"
+                               : "bg-indigo-600 hover:bg-indigo-700 text-white"
+                           }`}
+                       >
+                           {connectionStatus === "MATCHED" ? <><Award size={18} /> Matched</> : connectionStatus === "REQUEST_SENT" ? <><RefreshCw size={18} /> Request Sent</> : <><UserPlus size={18} /> Connect</>}
+                       </button>
+                       {!isOwner && (
+                           <button 
+                               onClick={() => setIsReportModalOpen(true)}
+                               className="p-5 bg-rose-500/10 text-rose-500 rounded-2xl border border-rose-500/20 hover:bg-rose-500/20 transition-all flex items-center justify-center shadow-xl"
+                               title="Report User"
+                           >
+                               <AlertOctagon size={20} />
+                           </button>
+                       )}
+                   </>
+                 ) : isEditMode && (
+                   <button onClick={handleSaveProfile} disabled={saving} className="px-10 py-5 bg-indigo-600 text-white rounded-2xl font-black uppercase tracking-widest shadow-xl flex items-center gap-3 active:scale-95 transition-all">
+                       {saving ? <Loader2 className="animate-spin" size={18} /> : <Save size={18} />} Synchronize
+                   </button>
+                 )}
+                 </div>
               </div>
            </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 px-4 mt-8">
            <div className="lg:col-span-8 space-y-8">
-              <div className="glass-card rounded-[3rem] p-10">
-                 <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-indigo-400 mb-8 flex items-center gap-2">Node Description (Bio) {isOwner && !isEditMode && <button onClick={() => setIsEditMode(true)}><Edit3 size={12} /></button>}</h2>
-                 {isEditMode ? (
-                     <textarea value={editBio} onChange={e => setEditBio(e.target.value)} rows={4} className="w-full bg-white/5 border border-white/10 rounded-2xl p-6 text-[15px] font-medium text-slate-300 leading-relaxed focus:border-indigo-500 focus:outline-none transition-all resize-none" />
-                 ) : (
-                     <p className="text-xl font-medium text-slate-400 leading-relaxed">{onboarding?.bio || "Expert Weaver focused on high-fidelity knowledge exchange."}</p>
-                 )}
-              </div>
-
               {/* Visual Showcase */}
               <div className="glass-card rounded-[3rem] p-10">
                 <div className="flex items-center justify-between mb-8">
@@ -490,71 +549,8 @@ const UserProfile = () => {
               </div>
            </div>
            
+
            <div className="lg:col-span-4 space-y-8">
-              <div className="glass-card rounded-[3rem] p-10 bg-gradient-to-br from-[#12182B] to-[#0B101E]">
-                 <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-500 mb-10">Signal Connection</h2>
-                 <div className="space-y-6">
-                    <div className="space-y-1.5 px-1 py-1">
-                        <label className="text-[9px] font-black uppercase tracking-widest text-slate-600 block">Email Bridge</label>
-                        {isEditMode ? (
-                            <input value={editEmail} onChange={e => setEditEmail(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-[13px] text-white focus:border-indigo-500 focus:outline-none" />
-                        ) : (
-                            <div className="flex items-center gap-3 text-slate-300"><Mail size={16} className="text-indigo-400 opacity-60" /> <span className="text-[14px] font-bold">{user?.email || "No email connected"}</span></div>
-                        )}
-                    </div>
-                    <div className="space-y-1.5 px-1 py-1">
-                        <label className="text-[9px] font-black uppercase tracking-widest text-slate-600 block">Phone Frequency</label>
-                        {isEditMode ? (
-                            <input value={editPhone} onChange={e => setEditPhone(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-[13px] text-white focus:border-indigo-500 focus:outline-none" />
-                        ) : (
-                            <div className="flex items-center gap-3 text-slate-300"><Phone size={16} className="text-indigo-400 opacity-60" /> <span className="text-[14px] font-bold">{user?.phone || "+977-XXXXXXXXXX"}</span></div>
-                        )}
-                    </div>
-                 </div>
-              </div>
-
-              <div className="glass-card rounded-[3rem] p-10 bg-[#0B101E] border border-white/5">
-                 <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-500 mb-8">Mandala Wisdom</h2>
-                 
-                 <div className="space-y-8">
-                    {/* Teaching Reputation */}
-                    <div className="space-y-3">
-                        <div className="flex justify-between items-end">
-                            <span className="text-[10px] font-black uppercase tracking-widest text-emerald-500">Guide Aura</span>
-                            <span className="text-xl font-black text-white italic">{user?.teachingReputation?.toFixed(1) || "5.0"}</span>
-                        </div>
-                        <div className="flex gap-1">
-                            {[1, 2, 3, 4, 5].map(star => (
-                                <Star key={star} size={14} fill={star <= (user?.teachingReputation || 5) ? "#10b981" : "none"} className={star <= (user?.teachingReputation || 5) ? "text-emerald-500" : "text-slate-800"} />
-                            ))}
-                        </div>
-                        <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">{user?.totalTeachingSessions || 0} Sessions Led</p>
-                    </div>
-
-                    {/* Learning Reputation */}
-                    <div className="space-y-3">
-                        <div className="flex justify-between items-end">
-                            <span className="text-[10px] font-black uppercase tracking-widest text-indigo-500">Seeker Clarity</span>
-                            <span className="text-xl font-black text-white italic">{user?.learningReputation?.toFixed(1) || "5.0"}</span>
-                        </div>
-                        <div className="flex gap-1">
-                            {[1, 2, 3, 4, 5].map(star => (
-                                <Star key={star} size={14} fill={star <= (user?.learningReputation || 5) ? "#6366f1" : "none"} className={star <= (user?.learningReputation || 5) ? "text-indigo-500" : "text-slate-800"} />
-                            ))}
-                        </div>
-                        <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">{user?.totalLearningSessions || 0} Pursuits Finished</p>
-                    </div>
-
-                    <div className="pt-6 border-t border-white/5">
-                        <div className="flex justify-between items-center">
-                            <span className="text-slate-400 font-bold">Resonance</span>
-                            <span className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-emerald-400 italic">
-                                {(((user?.teachingReputation || 5) + (user?.learningReputation || 5)) / 2).toFixed(1)}
-                            </span>
-                        </div>
-                    </div>
-                 </div>
-              </div>
 
               {/* AVAILABILITY SECTION */}
               <div className="glass-card rounded-[3rem] p-10 bg-gradient-to-br from-[#12182B] to-[#0B101E]">
@@ -562,6 +558,34 @@ const UserProfile = () => {
                     <ArrowUpRight size={14} /> Availability Flow
                 </h2>
                 
+                {/* Bulk availability setter */}
+                {isEditMode && (
+                  <div className="flex items-center gap-2 mb-4">
+                    <select
+                      value=""
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        const days = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+                        const newTeach = { ...editTeachAvailability };
+                        const newLearn = { ...editLearnAvailability };
+                        days.forEach(d => {
+                          newTeach[d] = val;
+                          newLearn[d] = val;
+                        });
+                        setEditTeachAvailability(newTeach);
+                        setEditLearnAvailability(newLearn);
+                      }}
+                      className="bg-white/5 border border-white/10 rounded-lg px-2 py-1 text-[11px] text-white focus:outline-none focus:border-emerald-500"
+                    >
+                      <option value="">Set All</option>
+                      <option value="Morning">Morning</option>
+                      <option value="Afternoon">Afternoon</option>
+                      <option value="Evening">Evening</option>
+                      <option value="">Off</option>
+                    </select>
+                    <span className="text-xs text-slate-400 self-center">Apply to all days</span>
+                  </div>
+                )}
                 <div className="space-y-8">
                     {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map(day => (
                         <div key={day} className="flex items-center justify-between border-b border-white/5 pb-4 last:border-0 last:pb-0">

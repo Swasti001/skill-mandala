@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import AdminNavbar from "../components/AdminNavbar";
 import { Filter, CheckCircle2, XCircle, TrendingUp, Sparkles, MessageSquare, Briefcase, Plus, Terminal, Trash2, Pencil, X, CheckCircle } from "lucide-react";
-import axios from "axios";
+import adminApi from "../adminApi";
 
 const AdminSkills = () => {
   const [skills, setSkills] = useState([]);
@@ -13,9 +13,6 @@ const AdminSkills = () => {
   const [selectedSkill, setSelectedSkill] = useState(null);
   const [formData, setFormData] = useState({ title: "", desc: "", category: "Engineering", iconId: 0, badge: "NEW" });
   const [toast, setToast] = useState(null);
-
-  const token = localStorage.getItem("adminToken");
-  const headers = { Authorization: `Bearer ${token}` };
 
   const getIcon = (id) => {
     switch (parseInt(id)) {
@@ -30,7 +27,7 @@ const AdminSkills = () => {
 
   const fetchData = async () => {
     try {
-      const res = await axios.get("http://localhost:8080/api/admin/skills", { headers });
+      const res = await adminApi.get("/admin/skills");
       setSkills(res.data.skillsList);
       setMetrics(res.data.metrics);
       setTrending(res.data.trendingSkill);
@@ -64,10 +61,10 @@ const AdminSkills = () => {
     e.preventDefault();
     try {
       if (modalMode === "ADD") {
-        await axios.post("http://localhost:8080/api/admin/skills", formData, { headers });
+        await adminApi.post("/admin/skills", formData);
         showToast("Skill established in catalog!");
       } else {
-        await axios.put(`http://localhost:8080/api/admin/skills/${selectedSkill.id}`, formData, { headers });
+        await adminApi.put(`/admin/skills/${selectedSkill.id}`, formData);
         showToast("Skill metadata synchronized!");
       }
       setIsModalOpen(false);
@@ -80,7 +77,7 @@ const AdminSkills = () => {
   const handleDelete = async (id) => {
      if (!window.confirm("Commence skill decommissioning? This cannot be undone.")) return;
      try {
-        await axios.delete(`http://localhost:8080/api/admin/skills/${id}`, { headers });
+        await adminApi.delete(`/admin/skills/${id}`);
         showToast("Skill removed from catalog.");
         fetchData();
      } catch (err) {

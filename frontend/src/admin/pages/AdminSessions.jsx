@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import AdminNavbar from "../components/AdminNavbar";
 import { Filter, Plus, RefreshCw, CheckCircle, Star, TrendingUp, Clock, Calendar, ShieldCheck, Eye, MessageSquare, XCircle, MoreVertical, AlertOctagon } from "lucide-react";
-import axios from "axios";
+import adminApi from "../adminApi";
 
 const AdminSessions = () => {
   const [sessionsData, setSessionsData] = useState([]);
@@ -11,9 +11,6 @@ const AdminSessions = () => {
   const [toast, setToast] = useState(null);
   const [actionLoading, setActionLoading] = useState({});
 
-  const token = localStorage.getItem("adminToken");
-  const headers = { Authorization: `Bearer ${token}` };
-
   const showToast = (message, type = "success") => {
     setToast({ message, type });
     setTimeout(() => setToast(null), 3000);
@@ -21,7 +18,7 @@ const AdminSessions = () => {
 
   const fetchSessions = async () => {
     try {
-      const res = await axios.get("http://localhost:8080/api/admin/sessions", { headers });
+      const res = await adminApi.get("/admin/sessions");
       setSessionsData(res.data.sessions);
       setMetrics(res.data.metrics);
       setLoading(false);
@@ -37,7 +34,7 @@ const AdminSessions = () => {
   const handleTerminate = async (id) => {
     setActionLoading(prev => ({ ...prev, [id]: true }));
     try {
-      const res = await axios.put(`http://localhost:8080/api/admin/sessions/${id}/terminate`, {}, { headers });
+      const res = await adminApi.put(`/admin/sessions/${id}/terminate`);
       showToast(res.data.message, "success");
       setSessionsData(prev => prev.filter(s => s.id !== id));
       fetchSessions();

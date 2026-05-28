@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
+import Logo from "../../user/components/Logo";
 import {
   LayoutDashboard,
   Users,
@@ -43,21 +44,10 @@ const AdminNavbar = () => {
         <div className="flex h-full flex-col px-3 py-2">
           {/* Brand */}
           <div
-            className="mb-4 flex cursor-pointer items-center gap-2 px-3"
+            className="mb-6 flex cursor-pointer items-center px-3 hover:opacity-95 transition-opacity"
             onClick={() => navigate("/admin/dashboard")}
           >
-            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-violet-400 to-purple-600 text-white shadow-lg">
-              <Brain size={22} />
-            </div>
-
-            <div>
-              <h1 className="text-[11px] font-bold leading-none tracking-wide text-violet-100">
-                Skill Mandala
-              </h1>
-              <p className="mt-1 text-[11px] uppercase tracking-[0.22em] text-slate-400">
-                Admin Console
-              </p>
-            </div>
+            <Logo className="w-8 h-8" showText={true} />
           </div>
 
           {/* Nav Links */}

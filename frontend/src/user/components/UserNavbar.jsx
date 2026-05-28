@@ -33,9 +33,16 @@ const UserNavbar = () => {
   const { terminateSession } = useOnboarding();
   const dropdownRef = useRef(null);
 
-  const { user, refreshUser, logout: contextLogout } = useUser();
+  const { user, loading } = useUser();
   const currentUserId = user?.id;
-  const displayName = user?.name || user?.username || "Guest Weaver";
+
+  const displayName =
+    user?.name ||
+    (user?.firstName || user?.lastName ? `${user?.firstName || ''} ${user?.lastName || ''}`.trim() : null) ||
+    user?.username ||
+    "";
+
+
 
   const sidebarLinks = [
     { name: t("skill_hub"), path: "/skill-hub", icon: Sparkles },
@@ -49,21 +56,18 @@ const UserNavbar = () => {
     { name: t("help"), path: "/help", icon: CircleHelp },
   ];
 
+  const [unreadMessages, setUnreadMessages] = useState(0);
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [showNotifications, setShowNotifications] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   
-  // Notification States
-  const [notifications, setNotifications] = useState([]);
-  const [unreadCount, setUnreadCount] = useState(0);
-  const [unreadMessages, setUnreadMessages] = useState(0);
-  const [showNotifications, setShowNotifications] = useState(false);
-
   useEffect(() => {
     if (currentUserId) {
-      fetchNotifications();
       fetchMessageCount();
+      fetchNotifications();
       const interval = setInterval(() => {
-        fetchNotifications();
         fetchMessageCount();
       }, 15000);
       return () => clearInterval(interval);
@@ -129,6 +133,12 @@ const UserNavbar = () => {
        console.warn("Backend logout notification failed:", error);
     } finally {
        setIsLoggingOut(false);
+       // Clear stale cached/localStorage user data
+       localStorage.removeItem("token");
+       localStorage.removeItem("userId");
+       localStorage.removeItem("user");
+       localStorage.removeItem("onboardingCompleted");
+       localStorage.removeItem("currentOnboardingStep");
        terminateSession();
     }
   };
@@ -142,6 +152,15 @@ const UserNavbar = () => {
     if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
     return date.toLocaleDateString();
   };
+
+  // Show spinner while loading or if user not available
+  if (loading || !user) {
+    return (
+      <div className="flex items-center justify-center h-16 bg-[#0B101E]">
+        <div className="w-4 h-4 border-2 border-t-2 border-indigo-500 rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <>

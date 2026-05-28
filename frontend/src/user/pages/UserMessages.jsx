@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useLocation, useParams, useNavigate } from "react-router-dom";
-import api from "../api";
+import api, { getBackendBase, getWsUrl } from "../api";
 import axios from "axios";
 import { 
   Plus, Video, MoreVertical, 
@@ -19,6 +19,10 @@ const UserMessages = () => {
     const [conversations, setConversations] = useState([]);
     const [messages, setMessages] = useState([]);
     const [selectedConv, setSelectedConv] = useState(null);
+    const selectedConvRef = useRef(selectedConv);
+    useEffect(() => {
+        selectedConvRef.current = selectedConv;
+    }, [selectedConv]);
     const [newMessage, setNewMessage] = useState("");
     const [loading, setLoading] = useState(true);
     const [msgLoading, setMsgLoading] = useState(false);
@@ -61,7 +65,7 @@ const UserMessages = () => {
                     setSelectedConv({
                         id: null,
                         otherUserId: state.autoSelectUserId,
-                        otherUserName: state.autoSelectUserName || "Skill Partner", // Or whatever string we want
+                        otherUserName: state.autoSelectUserName || "Skill Partner",
                         matched: true
                     });
                 }
@@ -72,11 +76,11 @@ const UserMessages = () => {
         } finally {
             setLoading(false);
         }
-    }, [state, chatId]);
+    }, [state, chatId, userId]);
 
     // Fetch messages for a specific conversation
     const fetchMessages = React.useCallback(async (convId) => {
-        if (!convId) {
+        if (!convId || !userId) {
             setMessages([]);
             return;
         }
@@ -92,7 +96,7 @@ const UserMessages = () => {
         } finally {
             setMsgLoading(false);
         }
-    }, []);
+    }, [userId]);
 
     // Initial load
     useEffect(() => {
@@ -110,14 +114,14 @@ const UserMessages = () => {
 
         // Only establish connection if not already connecting/connected
         if (!socketRef.current || socketRef.current.readyState === WebSocket.CLOSED) {
-            const socket = new WebSocket(`ws://localhost:8080/ws-chat?token=${token}`);
+            const socket = new WebSocket(getWsUrl(token));
             socketRef.current = socket;
 
             socket.onopen = () => {
                 console.log("WebSocket connected");
                 // If a conversation is already selected, join the room immediately on reconnection
-                if (selectedConv?.id) {
-                    socket.send(JSON.stringify({ type: "JOIN_ROOM", roomId: selectedConv.id }));
+                if (selectedConvRef.current?.id) {
+                    socket.send(JSON.stringify({ type: "JOIN_ROOM", roomId: selectedConvRef.current.id }));
                 }
             };
 
@@ -128,7 +132,7 @@ const UserMessages = () => {
                     // Always refresh the conversation list to update last message/timestamp
                     fetchConversations();
                     
-                    if (selectedConv?.id && incomingMsg.conversationId === selectedConv.id) {
+                    if (selectedConvRef.current?.id && incomingMsg.conversationId === selectedConvRef.current.id) {
                          // Only append if it's not our own optimistic message (or just rely on the server message entirely)
                          setMessages((prev) => {
                              // Guard against duplicate messages (optimistic ID won't match server ID, but content does)
@@ -155,7 +159,7 @@ const UserMessages = () => {
                  socketRef.current = null;
              }
         };
-    }, [userId, token, fetchConversations, selectedConv]);
+    }, [userId, token, fetchConversations]);
 
     // Selection Side Effects
     useEffect(() => {
@@ -292,7 +296,7 @@ const UserMessages = () => {
                         <div className="flex-1 overflow-hidden">
                             <p className="text-[12px] font-black text-white truncate">{fileName}</p>
                             <button 
-                                onClick={() => window.open(`http://localhost:8080${fileUrl}`, '_blank')}
+                                onClick={() => window.open(`${getBackendBase()}${fileUrl}`, '_blank')}
                                 className="text-[10px] text-emerald-400 hover:text-white font-black uppercase tracking-widest mt-1 flex items-center gap-1 transition-colors"
                             >
                                 <ExternalLink size={10} /> View / Download

@@ -6,6 +6,7 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.stereotype.Component;
 
+import org.springframework.beans.factory.annotation.Value;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -13,7 +14,9 @@ import java.util.Map;
 @Component
 public class JwtUtils {
 
-    private final String jwtSecret = "SkillMandalaSuperSecretKeySkillMandalaSuperSecretKeySkillMandala123";
+    @Value("${jwt.secret:SkillMandalaSuperSecretKeySkillMandalaSuperSecretKeySkillMandala123}")
+    private String jwtSecret;
+
     private final long jwtExpirationMs = 24 * 60 * 60 * 1000; // 24 hours
 
     public String generateToken(Long userId, String username) {

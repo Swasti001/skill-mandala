@@ -10,6 +10,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.example.demo.service.UserService;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.http.HttpStatus;
 import java.util.Optional;
 
 @RestController
@@ -23,11 +26,25 @@ public class UserOnboardingController {
     @Autowired
     private UserOnboardingRepository onboardingRepository;
 
+    @Autowired
+    private UserService userService;
+
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     // NEW: Get onboarding data (used to decide whether to show onboarding again)
     @GetMapping("/{userId}")
-    public ResponseEntity<?> getOnboarding(@PathVariable Long userId) {
+    public ResponseEntity<?> getOnboarding(@PathVariable Long userId, HttpServletRequest request) {
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("No token provided");
+        }
+        User loggedInUser = userService.getUserFromToken(authHeader);
+        if (loggedInUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid or expired token");
+        }
+        if (!loggedInUser.getId().equals(userId)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Access denied: You can only view your own onboarding profile");
+        }
 
         Optional<User> optionalUser = userRepository.findById(userId);
         if (optionalUser.isEmpty()) {
@@ -48,8 +65,20 @@ public class UserOnboardingController {
     @PostMapping("/{userId}")
     public ResponseEntity<?> saveOnboarding(
             @PathVariable Long userId,
-            @RequestBody UserOnboardingDTO onboardingData
+            @RequestBody UserOnboardingDTO onboardingData,
+            HttpServletRequest request
     ) {
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("No token provided");
+        }
+        User loggedInUser = userService.getUserFromToken(authHeader);
+        if (loggedInUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid or expired token");
+        }
+        if (!loggedInUser.getId().equals(userId)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Access denied: You can only update your own onboarding profile");
+        }
 
         // Find user by ID
         Optional<User> optionalUser = userRepository.findById(userId);

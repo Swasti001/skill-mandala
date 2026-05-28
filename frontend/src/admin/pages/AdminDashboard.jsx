@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import AdminNavbar from "../components/AdminNavbar";
-import axios from "axios";
+import adminApi from "../adminApi";
 import {
   Users,
   CalendarRange,
@@ -29,10 +29,7 @@ const AdminDashboard = () => {
   const fetchStats = async (currentPeriod) => {
     try {
       setLoading(true);
-      const token = localStorage.getItem("adminToken");
-      const response = await axios.get(`http://localhost:8080/api/admin/dashboard-stats?period=${currentPeriod}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const response = await adminApi.get(`/admin/dashboard-stats?period=${currentPeriod}`);
       setData(response.data);
     } catch (err) {
       setError("Failed to fetch platform statistics.");
