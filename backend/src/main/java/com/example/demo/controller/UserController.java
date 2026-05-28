@@ -25,7 +25,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 @RestController
 @RequestMapping(value={"/api/user"})
-@CrossOrigin(origins={"*"})
 public class UserController {
     private final UserService userService;
     private final UserRepository userRepository;

@@ -7,7 +7,6 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/user/messages")
-@CrossOrigin(origins = "http://localhost:3000")
 public class MessageController {
 
     private final MessageService messageService;

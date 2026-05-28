@@ -13,7 +13,6 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/user/wallet")
-@CrossOrigin(origins = "*")
 public class WalletController {
 
     private final WalletTransactionRepository transactionRepository;

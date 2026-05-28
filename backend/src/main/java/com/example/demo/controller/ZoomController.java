@@ -25,7 +25,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping(value = { "/api/zoom" })
-@CrossOrigin(originPatterns = { "*" })
 public class ZoomController {
     private final ZoomService zoomService;
     private final UserService userService;

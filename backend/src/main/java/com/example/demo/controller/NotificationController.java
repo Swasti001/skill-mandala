@@ -9,7 +9,6 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/notifications")
-@CrossOrigin(originPatterns = "*")
 public class NotificationController {
 
     private final NotificationService notificationService;

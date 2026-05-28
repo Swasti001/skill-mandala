@@ -11,7 +11,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/user/matches")
-@CrossOrigin(originPatterns = "*")
 public class MatchController {
 
     private final MatchService matchService;

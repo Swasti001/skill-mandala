@@ -22,7 +22,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping(value={"/api/user/sessions"})
-@CrossOrigin(origins={"http://localhost:3000"})
 public class SessionController {
     private final SessionService sessionService;
     private final UserService userService;

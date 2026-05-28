@@ -33,7 +33,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping(value={"/api/user/dashboard"})
-@CrossOrigin(origins={"http://localhost:3000"})
 public class UserDashboardController {
     private final MatchService matchService;
     private final SessionService sessionService;

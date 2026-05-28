@@ -17,7 +17,6 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/user/onboarding")
-@CrossOrigin(origins = "http://localhost:3000")
 public class UserOnboardingController {
 
     @Autowired
