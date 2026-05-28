@@ -190,9 +190,14 @@ public class SessionService {
         learner.setXp(learner.getXp() + 5);
         this.userRepository.save(learner);
 
-        // Log transaction
+        // Deduct from learner, credit to teacher immediately upon booking
+        teacher.setCredits(teacher.getCredits() + creditCost);
+        this.userRepository.save(teacher);
+
+        // Log transactions
         String teacherName = teacher != null ? teacher.getName() : "Expert Weaver";
         this.transactionRepository.save(new WalletTransaction(learnerId, -creditCost, "SPEND", "Booked session: " + dto.getTopic(), teacherName, dto.getTeacherId()));
+        this.transactionRepository.save(new WalletTransaction(dto.getTeacherId(), creditCost, "EARN", "Teaching Session: " + dto.getTopic(), learner.getName(), learnerId));
 
         // Inject System Message into the chat stream indicating booking/payment completion
         try {
@@ -243,32 +248,25 @@ public class SessionService {
         session.setStatus(Session.SessionStatus.COMPLETED);
         this.sessionRepository.save(session);
 
-        // 💰 Wallet Logic: Reward the Teacher (User B)
+        // 💰 Wallet Logic: Award Teacher XP and send notification (Credits were already paid at booking time)
         try {
             User teacher = userRepository.findById(session.getUserB()).orElse(null);
             if (teacher != null) {
-                // Calculate rewards (10 credits per 30 mins)
                 int duration = session.getDuration() != null ? session.getDuration() : 60;
                 int payout = (int) Math.ceil(duration / 30.0) * 10;
                 
-                teacher.setCredits(teacher.getCredits() + payout);
                 teacher.setXp(teacher.getXp() + 50); // Knowledge Weaver bonus!
                 userRepository.save(teacher);
                 
-                // Log transaction
-                User learner = userRepository.findById(session.getUserA()).orElse(null);
-                String learnerName = learner != null ? learner.getName() : "Skill Seeker";
-                transactionRepository.save(new WalletTransaction(teacher.getId(), payout, "EARN", "Teaching Session: " + session.getTopic(), learnerName, session.getUserA()));
-
-                // Notify the teacher about their earnings
+                // Notify the teacher about their completion and XP reward
                 notificationService.createNotification(
                     teacher.getId(), 
-                    "You earned " + payout + " credits and 50 XP for sharing your wisdom! 💰✨", 
+                    "Session marked completed! You received 50 XP. (Credits were transferred at booking time) 💰✨", 
                     "WALLET"
                 );
             }
         } catch (Exception e) {
-            System.err.println("⚠️ Wallet reward failed: " + e.getMessage());
+            System.err.println("⚠️ Wallet XP award failed: " + e.getMessage());
         }
 
         // --- UPDATE MATCH AGREEMENT ---

@@ -207,19 +207,27 @@ const SessionsPage = () => {
         </div>
 
         <div className="flex items-center bg-[#12182B]/60 p-1.5 rounded-[24px] border border-slate-700/50 backdrop-blur-md">
-          {["active", "pending", "completed"].map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`px-6 py-2.5 rounded-[18px] text-[11px] font-black uppercase tracking-widest transition-all duration-300 ${
-                activeTab === tab 
-                  ? "bg-indigo-500 text-[#0B101E] shadow-xl" 
-                  : "text-slate-500 hover:text-white"
-              }`}
-            >
-              {t(tab)}
-            </button>
-          ))}
+          {["active", "pending", "completed"].map((tab) => {
+            const count = tab === "pending" ? sessions.filter(s => s.status === 'PENDING' && s.incoming).length : 0;
+            return (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={`px-6 py-2.5 rounded-[18px] text-[11px] font-black uppercase tracking-widest transition-all duration-300 flex items-center gap-2 ${
+                  activeTab === tab 
+                    ? "bg-indigo-500 text-[#0B101E] shadow-xl" 
+                    : "text-slate-500 hover:text-white"
+                }`}
+              >
+                {t(tab)}
+                {tab === "pending" && count > 0 && (
+                  <span className={`px-2 py-0.5 rounded-full text-[9px] font-black transition-all duration-300 ${activeTab === 'pending' ? 'bg-[#0B101E] text-indigo-400' : 'bg-indigo-500 text-[#0B101E]'}`}>
+                    {count}
+                  </span>
+                )}
+              </button>
+            );
+          })}
         </div>
       </div>
 

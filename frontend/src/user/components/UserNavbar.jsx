@@ -16,7 +16,9 @@ import {
   Users,
   Clock,
   Languages,
-  Wallet
+  Wallet,
+  Menu,
+  X
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
@@ -57,6 +59,8 @@ const UserNavbar = () => {
   ];
 
   const [unreadMessages, setUnreadMessages] = useState(0);
+  const [unreadSessions, setUnreadSessions] = useState(0);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [showNotifications, setShowNotifications] = useState(false);
@@ -67,8 +71,10 @@ const UserNavbar = () => {
     if (currentUserId) {
       fetchMessageCount();
       fetchNotifications();
+      fetchSessionCount();
       const interval = setInterval(() => {
         fetchMessageCount();
+        fetchSessionCount();
       }, 15000);
       return () => clearInterval(interval);
     }
@@ -80,6 +86,16 @@ const UserNavbar = () => {
       setUnreadMessages(res.data.unreadCount || 0);
     } catch (err) {
       console.error("Message count sync failed:", err);
+    }
+  };
+
+  const fetchSessionCount = async () => {
+    try {
+      const res = await api.get(`/user/sessions/${currentUserId}`);
+      const incomingPending = (res.data || []).filter(s => s.status === 'PENDING' && s.incoming).length;
+      setUnreadSessions(incomingPending);
+    } catch (err) {
+      console.error("Session count sync failed:", err);
     }
   };
 
@@ -164,9 +180,18 @@ const UserNavbar = () => {
 
   return (
     <>
-      <aside className="fixed left-0 top-0 z-30 h-screen w-[220px] border-r border-slate-800/60 bg-[#0B101E] text-slate-100 flex flex-col">
+      {/* Mobile Drawer Backdrop */}
+      {isMobileMenuOpen && (
+        <div 
+          className="fixed inset-0 z-30 bg-black/60 md:hidden backdrop-blur-sm"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
+
+      {/* Sidebar/Aside */}
+      <aside className={`fixed left-0 top-0 z-40 h-screen w-[220px] border-r border-slate-800/60 bg-[#0B101E] text-slate-100 flex flex-col transition-transform duration-300 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
         <div className="flex h-full flex-col px-4 py-6">
-          <div className="mb-10 flex cursor-pointer items-center px-2" onClick={() => navigate("/skill-hub")}>
+          <div className="mb-10 flex cursor-pointer items-center px-2" onClick={() => { navigate("/skill-hub"); setIsMobileMenuOpen(false); }}>
             <Logo />
           </div>
 
@@ -177,6 +202,7 @@ const UserNavbar = () => {
                 <NavLink
                   key={link.name}
                   to={link.path}
+                  onClick={() => setIsMobileMenuOpen(false)}
                   className={({ isActive }) =>
                     `group flex items-center justify-between rounded-lg px-3 py-2.5 text-[14px] font-medium transition ${
                       isActive ? "bg-slate-800/50 text-[#C4B5FD] border-l-2 border-[#C4B5FD]" : "text-slate-400 hover:bg-slate-800/30 hover:text-white border-l-2 border-transparent"
@@ -192,6 +218,11 @@ const UserNavbar = () => {
                       {unreadMessages > 9 ? "9+" : unreadMessages}
                     </span>
                   )}
+                  {link.path === "/sessions" && unreadSessions > 0 && (
+                    <span className="flex h-5 min-w-[20px] items-center justify-center rounded-full bg-indigo-500 px-1.5 text-[10px] font-black text-[#0B101E] shadow-lg ring-1 ring-[#0B101E]">
+                      {unreadSessions}
+                    </span>
+                  )}
                 </NavLink>
               );
             })}
@@ -199,10 +230,19 @@ const UserNavbar = () => {
         </div>
       </aside>
 
-      <header className="fixed left-[220px] right-0 top-0 z-20 border-b border-slate-800/60 bg-[#0B101E]/95 px-8 py-4 backdrop-blur-md">
-        <div className="flex items-center justify-end w-full gap-4">
+      {/* Header */}
+      <header className="fixed left-0 md:left-[220px] right-0 top-0 z-20 border-b border-slate-800/60 bg-[#0B101E]/95 px-4 md:px-8 py-4 backdrop-blur-md">
+        <div className="flex items-center justify-between w-full gap-4">
+          
+          {/* Hamburger Menu Toggle Button on Mobile */}
+          <button 
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="p-2 text-slate-400 hover:text-white bg-white/5 rounded-xl border border-white/5 md:hidden transition"
+          >
+            {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+          </button>
 
-          <div className="flex items-center gap-5">
+          <div className="flex items-center justify-end flex-1 gap-4">
             {/* Language Switcher */}
             <div className="flex items-center gap-1 bg-[#1C2333] border border-slate-700/50 rounded-full p-1 self-center">
                <button 
