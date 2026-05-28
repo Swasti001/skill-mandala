@@ -41,7 +41,6 @@ export const UserProvider = ({ children }) => {
             return;
         }
         try {
-            setLoading(true);
             const res = await api.get('/user/me');
             setUser(res.data);
         } catch (err) {
@@ -49,8 +48,6 @@ export const UserProvider = ({ children }) => {
             if (err.response?.status === 401) {
                 setUser(null);
             }
-        } finally {
-            setLoading(false);
         }
     }, []);
 

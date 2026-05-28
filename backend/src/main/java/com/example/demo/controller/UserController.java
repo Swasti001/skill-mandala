@@ -82,6 +82,10 @@ public class UserController {
         response.put("xp", user.getXp());
         response.put("level", user.getLevel());
         response.put("streak", user.getStreak());
+        response.put("teachingReputation", user.getTeachingReputation());
+        response.put("learningReputation", user.getLearningReputation());
+        response.put("totalTeachingSessions", user.getTotalTeachingSessions());
+        response.put("totalLearningSessions", user.getTotalLearningSessions());
         
         return ResponseEntity.ok(response);
     }
