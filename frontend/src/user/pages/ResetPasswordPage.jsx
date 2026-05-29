@@ -53,8 +53,12 @@ const ResetPasswordPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex bg-slate-950 items-center justify-center px-6">
-      <div className="w-full max-w-md bg-slate-900 border border-slate-700 p-8 rounded-3xl shadow-xl">
+    <div className="min-h-screen flex bg-[#020617] text-slate-50 items-center justify-center px-6 relative overflow-hidden">
+      {/* Background Ambient Glows */}
+      <div className="absolute bottom-0 left-0 w-[800px] h-[800px] bg-amber-900/10 rounded-full blur-[120px] pointer-events-none mix-blend-screen" />
+      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-amber-900/10 rounded-full blur-[100px] pointer-events-none mix-blend-screen" />
+
+      <div className="w-full max-w-md bg-[#12182B]/80 backdrop-blur-2xl border border-white/10 rounded-[32px] shadow-[0_0_50px_rgba(0,0,0,0.5)] p-10 relative z-10">
         <h2 className="text-2xl font-bold text-white mb-2 text-center">Set New Password</h2>
         <p className="text-sm text-slate-400 mb-8 text-center">
           Please enter your new password below.
@@ -70,7 +74,7 @@ const ResetPasswordPage = () => {
                 type="password"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 transition"
+                className="w-full px-4 py-3 rounded-[20px] bg-slate-950 border border-slate-800 text-slate-100 text-sm placeholder-slate-600 focus:outline-none focus:border-purple-500/50 focus:ring-2 focus:ring-purple-500/10 transition duration-300"
                 placeholder="Min 8 characters"
                 required
               />
@@ -81,7 +85,7 @@ const ResetPasswordPage = () => {
                 type="password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 transition"
+                className="w-full px-4 py-3 rounded-[20px] bg-slate-950 border border-slate-800 text-slate-100 text-sm placeholder-slate-600 focus:outline-none focus:border-purple-500/50 focus:ring-2 focus:ring-purple-500/10 transition duration-300"
                 placeholder="Retype password"
                 required
               />
@@ -89,7 +93,7 @@ const ResetPasswordPage = () => {
             <button
               type="submit"
               disabled={loading || !token}
-              className="w-full py-3 rounded-full bg-emerald-500 text-white font-bold text-sm hover:bg-emerald-600 shadow-lg disabled:opacity-50"
+              className="w-full mt-4 py-4 rounded-full text-xs font-black uppercase tracking-widest bg-gradient-to-r from-purple-500 via-pink-500 to-rose-500 text-white hover:brightness-110 transition-all duration-300 shadow-xl shadow-purple-500/10 disabled:opacity-50"
             >
               {loading ? "Resetting..." : "Confirm New Password"}
             </button>
@@ -101,7 +105,7 @@ const ResetPasswordPage = () => {
             </div>
             <button
               onClick={() => navigate("/login")}
-              className="px-8 py-3 rounded-full bg-white text-black font-bold text-sm hover:brightness-90 transition inline-block w-full"
+              className="w-full mt-4 py-4 rounded-full text-xs font-black uppercase tracking-widest bg-gradient-to-r from-purple-500 via-pink-500 to-rose-500 text-white hover:brightness-110 transition-all duration-300 shadow-xl shadow-purple-500/10"
             >
               Back to Login
             </button>

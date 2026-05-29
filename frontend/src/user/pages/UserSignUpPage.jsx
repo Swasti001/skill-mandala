@@ -228,7 +228,7 @@ const UserSignUpPage = ({ setIsAuthenticated }) => {
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className={`w-full px-3 py-2 rounded-xl bg-slate-950 border ${errors.name ? 'border-red-500' : 'border-slate-700'} text-sm focus:outline-none focus:ring-2 focus:ring-purple-500`}
+                className={`w-full px-4 py-3 rounded-[20px] bg-slate-950 border ${errors.name ? 'border-red-500' : 'border-slate-800'} text-slate-100 text-sm placeholder-slate-600 focus:outline-none focus:border-purple-500/50 focus:ring-2 focus:ring-purple-500/10 transition duration-300`}
                 placeholder="Your name"
                 required
               />
@@ -242,7 +242,7 @@ const UserSignUpPage = ({ setIsAuthenticated }) => {
                   type="date"
                   value={dob}
                   onChange={(e) => setDob(e.target.value)}
-                  className={`w-full px-3 py-2 rounded-xl bg-slate-950 border ${errors.dob ? 'border-red-500' : 'border-slate-700'} text-sm focus:outline-none focus:ring-2 focus:ring-purple-500`}
+                  className={`w-full px-4 py-3 rounded-[20px] bg-slate-950 border ${errors.dob ? 'border-red-500' : 'border-slate-800'} text-slate-100 text-sm placeholder-slate-600 focus:outline-none focus:border-purple-500/50 focus:ring-2 focus:ring-purple-500/10 transition duration-300`}
                   required
                 />
                 {errors.dob && <p className="text-[10px] text-red-500 mt-1 pl-1">{errors.dob}</p>}
@@ -254,7 +254,7 @@ const UserSignUpPage = ({ setIsAuthenticated }) => {
                   type="text"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
-                  className={`w-full px-3 py-2 rounded-xl bg-slate-950 border ${errors.phone ? 'border-red-500' : 'border-slate-700'} text-sm focus:outline-none focus:ring-2 focus:ring-purple-500`}
+                  className={`w-full px-4 py-3 rounded-[20px] bg-slate-950 border ${errors.phone ? 'border-red-500' : 'border-slate-800'} text-slate-100 text-sm placeholder-slate-600 focus:outline-none focus:border-purple-500/50 focus:ring-2 focus:ring-purple-500/10 transition duration-300`}
                   placeholder="10 digit number"
                   required
                 />
@@ -268,7 +268,7 @@ const UserSignUpPage = ({ setIsAuthenticated }) => {
                 type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                className={`w-full px-3 py-2 rounded-xl bg-slate-950 border ${errors.username ? 'border-red-500' : 'border-slate-700'} text-sm focus:outline-none focus:ring-2 focus:ring-purple-500`}
+                className={`w-full px-4 py-3 rounded-[20px] bg-slate-950 border ${errors.username ? 'border-red-500' : 'border-slate-800'} text-slate-100 text-sm placeholder-slate-600 focus:outline-none focus:border-purple-500/50 focus:ring-2 focus:ring-purple-500/10 transition duration-300`}
                 placeholder="Choose a username"
                 required
               />
@@ -281,7 +281,7 @@ const UserSignUpPage = ({ setIsAuthenticated }) => {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className={`w-full px-3 py-2 rounded-xl bg-slate-950 border ${errors.email ? 'border-red-500' : 'border-slate-700'} text-sm focus:outline-none focus:ring-2 focus:ring-purple-500`}
+                className={`w-full px-4 py-3 rounded-[20px] bg-slate-950 border ${errors.email ? 'border-red-500' : 'border-slate-800'} text-slate-100 text-sm placeholder-slate-600 focus:outline-none focus:border-purple-500/50 focus:ring-2 focus:ring-purple-500/10 transition duration-300`}
                 placeholder="you@example.com"
                 required
               />
@@ -295,14 +295,14 @@ const UserSignUpPage = ({ setIsAuthenticated }) => {
                   type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className={`w-full px-3 py-2 rounded-xl bg-slate-950 border ${errors.password ? 'border-red-500' : 'border-slate-700'} text-sm focus:outline-none focus:ring-2 focus:ring-purple-500`}
+                  className={`w-full px-4 py-3 rounded-[20px] bg-slate-950 border ${errors.password ? 'border-red-500' : 'border-slate-800'} text-slate-100 text-sm placeholder-slate-600 focus:outline-none focus:border-purple-500/50 focus:ring-2 focus:ring-purple-500/10 transition duration-300`}
                   placeholder="••••••••"
                   required
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-purple-400 hover:text-purple-300"
+                  className="absolute right-4 top-1/2 transform -translate-y-1/2 text-purple-400 hover:text-purple-300"
                 >
                   {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
@@ -323,14 +323,14 @@ const UserSignUpPage = ({ setIsAuthenticated }) => {
                   type={showConfirmPassword ? "text" : "password"}
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className={`w-full px-3 py-2 rounded-xl bg-slate-950 border ${errors.confirmPassword ? 'border-red-500' : 'border-slate-700'} text-sm focus:outline-none focus:ring-2 focus:ring-purple-500`}
+                  className={`w-full px-4 py-3 rounded-[20px] bg-slate-950 border ${errors.confirmPassword ? 'border-red-500' : 'border-slate-800'} text-slate-100 text-sm placeholder-slate-600 focus:outline-none focus:border-purple-500/50 focus:ring-2 focus:ring-purple-500/10 transition duration-300`}
                   placeholder="••••••••"
                   required
                 />
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-purple-400 hover:text-purple-300"
+                  className="absolute right-4 top-1/2 transform -translate-y-1/2 text-purple-400 hover:text-purple-300"
                 >
                   {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
@@ -347,9 +347,9 @@ const UserSignUpPage = ({ setIsAuthenticated }) => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full mt-2 py-2.5 rounded-full text-sm font-semibold
-                         bg-gradient-to-r from-purple-500 via-pink-500 to-rose-500
-                         hover:brightness-110 transition disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full mt-4 py-4 rounded-full text-xs font-black uppercase tracking-widest
+                         bg-gradient-to-r from-purple-500 via-pink-500 to-rose-500 text-white
+                         hover:brightness-110 transition-all duration-300 shadow-xl shadow-purple-500/10 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? "Creating account..." : "Create account"}
             </button>

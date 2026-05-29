@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import AdminNavbar from "../components/AdminNavbar";
-import { User, Shield, Sparkles, Bell, AlertTriangle, Eye, Link, Bold, Italic, PenLine, CheckCircle, AlertOctagon } from "lucide-react";
+import { User, Shield, Sparkles, Bell, AlertTriangle, Bold, Italic, PenLine, CheckCircle, AlertOctagon, Link } from "lucide-react";
 import adminApi from "../adminApi";
 
 const Switch = ({ checked, onChange }) => (
@@ -226,64 +226,40 @@ const AdminSettings = () => {
             {/* Right Column */}
             <div className="space-y-6">
 
-              {/* Algorithm Tuning & Announcements */}
+              {/* Platform Configuration & Announcements */}
               <div className="bg-[#181e2d] border border-slate-700/40 rounded-[28px] p-7 shadow-xl">
-                <div className="flex items-center justify-between mb-8">
-                  <div className="flex items-center gap-3">
-                    <Sparkles size={18} className="text-slate-300" />
-                    <h2 className="text-lg font-bold text-white">Algorithm Tuning</h2>
-                  </div>
-                  <span className="text-[9px] font-bold uppercase tracking-widest bg-slate-800/60 border border-slate-700/50 px-3 py-1.5 rounded-full text-slate-300 shadow-sm">
-                    {config.matchingAlgorithm || 'ENGINE V4.2-STABLE'}
-                  </span>
+                <div className="flex items-center gap-3 mb-8">
+                  <Sparkles size={18} className="text-slate-300" />
+                  <h2 className="text-lg font-bold text-white">Platform Configuration</h2>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-                  <div className="space-y-6">
-                     <div>
-                       <div className="flex justify-between items-end mb-2">
-                          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">SKILL RELEVANCE WEIGHT</span>
-                          <span className="text-[11px] font-bold text-white">{config.skillRelevanceWeight}%</span>
-                       </div>
-                       <input 
-                        type="range"
-                        min="0"
-                        max="100"
-                        value={config.skillRelevanceWeight}
-                        onChange={(e) => handleConfigChange('skillRelevanceWeight', parseInt(e.target.value))}
-                        className="w-full h-1 bg-slate-800 rounded-full appearance-none cursor-pointer accent-[#c8a8ff]"
-                       />
-                     </div>
-                     <div>
-                       <div className="flex justify-between items-end mb-2">
-                          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">PROXIMITY BIAS</span>
-                          <span className="text-[11px] font-bold text-white">{config.proximityBias}%</span>
-                       </div>
-                       <input 
-                        type="range"
-                        min="0"
-                        max="100"
-                        value={config.proximityBias}
-                        onChange={(e) => handleConfigChange('proximityBias', parseInt(e.target.value))}
-                        className="w-full h-1 bg-slate-800 rounded-full appearance-none cursor-pointer accent-[#c8a8ff]"
-                       />
-                     </div>
+                <div className="space-y-6 mb-8">
+                  <div className="bg-[#121623] border border-slate-800/80 rounded-2xl p-5">
+                    <h3 className="text-[13px] font-bold text-white mb-1">Skill Exchange Mode</h3>
+                    <p className="text-[11px] text-slate-400 mb-4">Control how users are matched and connected on the platform.</p>
+                    <div className="flex gap-2">
+                      {["Mutual", "Open", "Curated"].map((mode) => (
+                        <button key={mode} className="px-4 py-2 rounded-xl border border-slate-700/60 text-[11px] font-bold text-slate-300 hover:bg-slate-800 hover:text-white transition first:bg-[#c8a8ff]/10 first:border-[#c8a8ff]/30 first:text-[#c8a8ff]">
+                          {mode}
+                        </button>
+                      ))}
+                    </div>
                   </div>
 
-                  <div className="space-y-5">
-                     <div>
-                        <label className="block text-[11px] font-bold text-slate-400 mb-1.5">Matching API Key</label>
-                        <div className="relative">
-                           <input type="password" defaultValue="sk_live_1234567890abcdef" className="w-full bg-[#121623] border border-slate-800 rounded-xl px-4 py-2.5 text-[13px] text-slate-400 focus:outline-none focus:border-[#c8a8ff]/50 pr-10 tracking-[0.2em] font-mono" />
-                           <button className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 transition">
-                             <Eye size={14} />
-                           </button>
-                        </div>
-                     </div>
-                     <div>
-                        <label className="block text-[11px] font-bold text-slate-400 mb-1.5">Fallback Endpoint</label>
-                        <input type="text" defaultValue="https://api.skillmandala.ai/v1/lega" className="w-full bg-[#121623] border border-slate-800 rounded-xl px-4 py-2.5 text-[12px] text-slate-400 focus:outline-none focus:border-[#c8a8ff]/50 truncate font-mono" />
-                     </div>
+                  <div className="bg-[#121623] border border-slate-800/80 rounded-2xl p-5">
+                    <div className="flex justify-between items-center mb-1">
+                      <h3 className="text-[13px] font-bold text-white">Session Duration Limit</h3>
+                      <span className="text-[12px] font-bold text-[#c8a8ff]">90 min</span>
+                    </div>
+                    <p className="text-[11px] text-slate-400 mb-3">Maximum allowed duration per skill exchange session.</p>
+                    <input
+                      type="range" min="30" max="180" defaultValue="90"
+                      className="w-full h-1 bg-slate-800 rounded-full appearance-none cursor-pointer accent-[#c8a8ff]"
+                    />
+                    <div className="flex justify-between mt-1">
+                      <span className="text-[9px] text-slate-500">30 min</span>
+                      <span className="text-[9px] text-slate-500">180 min</span>
+                    </div>
                   </div>
                 </div>
 

@@ -67,7 +67,27 @@ const AdminUsers = () => {
     }
   };
 
-  if (loading) return <div className="min-h-screen bg-[#06142b] flex items-center justify-center text-violet-300">Loading Population...</div>;
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#06142b] text-slate-50">
+        <AdminNavbar />
+        <main className="ml-[200px] min-h-screen px-8 pb-10 pt-24 space-y-8 animate-pulse">
+          <div>
+            <div className="h-8 w-48 bg-slate-800 rounded mb-2" />
+            <div className="h-4 w-96 bg-slate-800 rounded" />
+          </div>
+
+          <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[1, 2, 3].map(n => (
+              <div key={n} className="bg-slate-900/40 border border-slate-800 rounded-2xl p-6 h-28" />
+            ))}
+          </section>
+
+          <section className="rounded-3xl border border-slate-800 bg-[#0c192e]/60 h-96" />
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#06142b] text-slate-50 relative">

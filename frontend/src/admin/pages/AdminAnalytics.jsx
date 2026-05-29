@@ -6,37 +6,95 @@ import adminApi from "../adminApi";
 const AdminAnalytics = () => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [toast, setToast] = useState(null);
+  const [period, setPeriod] = useState("Monthly");
 
   const showToast = (message, type = "success") => {
     setToast({ message, type });
     setTimeout(() => setToast(null), 3000);
   };
 
-  const fetchAnalytics = async () => {
+  const fetchAnalytics = async (currentPeriod, showFullscreen = false) => {
     try {
-      const res = await adminApi.get("/admin/analytics");
+      if (showFullscreen || !data) {
+        setLoading(true);
+      }
+      const res = await adminApi.get(`/admin/analytics?period=${currentPeriod}`);
       setData(res.data);
-      setLoading(false);
+      setError("");
     } catch (err) {
       console.error(err);
+      setError("Unable to initialize Analytics Engine. Platform sync failed.");
+    } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => { fetchAnalytics(); }, []);
+  useEffect(() => {
+    fetchAnalytics(period, true);
+    const interval = setInterval(() => {
+      fetchAnalytics(period, false);
+    }, 30000);
+    return () => clearInterval(interval);
+  }, [period]);
 
   const handleExport = () => {
     showToast("Report exported successfully!", "success");
   };
 
   const handleRefresh = () => {
-    setLoading(true);
-    fetchAnalytics();
+    fetchAnalytics(period, true);
     showToast("Analytics data refreshed", "success");
   };
 
-  if (loading) return <div className="min-h-screen bg-[#0e121e] text-slate-50 font-sans flex items-center justify-center">Loading Analytics Engine...</div>;
+  const handlePeriodChange = (newPeriod) => {
+    setPeriod(newPeriod);
+  };
+
+  if (loading && !data) {
+    return (
+      <div className="min-h-screen bg-[#0e121e] text-slate-50 font-sans">
+        <AdminNavbar />
+        <main className="ml-[200px] min-h-screen pt-20 px-8 pb-10">
+          <div className="max-w-[1100px] mx-auto space-y-6 animate-pulse">
+            <div className="flex justify-between items-end mb-8">
+              <div>
+                <div className="h-4 w-32 bg-slate-800 rounded mb-2" />
+                <div className="h-8 w-60 bg-slate-800 rounded" />
+              </div>
+              <div className="h-10 w-44 bg-slate-800 rounded-[12px]" />
+            </div>
+            <section className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6">
+              <div className="bg-[#181f30]/80 border border-slate-800/60 rounded-[24px] h-[380px]" />
+              <div className="flex flex-col gap-6">
+                <div className="bg-[#181f30]/80 border border-slate-800/60 rounded-[24px] h-[178px]" />
+                <div className="bg-[#181f30]/80 border border-slate-800/60 rounded-[24px] h-[178px]" />
+              </div>
+            </section>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  if (error && !data) {
+    return (
+      <div className="min-h-screen bg-[#0e121e] text-slate-50 flex flex-col items-center justify-center gap-6 font-sans">
+        <div className="p-5 bg-red-500/10 border border-red-500/20 text-red-400 rounded-3xl max-w-sm text-center">
+          <AlertOctagon size={48} className="mx-auto mb-4 text-red-500 opacity-80" />
+          <p className="font-bold text-lg mb-2">Analytics Sync Failure</p>
+          <p className="text-xs text-slate-400">{error}</p>
+        </div>
+        <button
+          onClick={() => fetchAnalytics(period, true)}
+          className="px-6 py-3 bg-violet-600 hover:bg-violet-700 active:scale-95 transition-all text-white text-xs font-black uppercase tracking-widest rounded-xl shadow-lg shadow-violet-500/20"
+        >
+          Reactivate Connection
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#0e121e] text-slate-50 font-sans">
@@ -62,9 +120,19 @@ const AdminAnalytics = () => {
                 <RefreshCw size={14} /> Refresh
               </button>
               <div className="flex items-center gap-2 bg-[#1b2336] p-1.5 rounded-xl border border-slate-800">
-                 <button className="px-4 py-2 rounded-lg text-[12px] font-bold text-slate-400 hover:text-white transition">Weekly</button>
-                 <button className="px-5 py-2 rounded-lg bg-[#a682ff]/20 text-[#c8a8ff] text-[12px] font-bold shadow-sm border border-[#a682ff]/20">Monthly</button>
-                 <button className="px-4 py-2 rounded-lg text-[12px] font-bold text-slate-400 hover:text-white transition">Yearly</button>
+                 {["Weekly", "Monthly", "Yearly"].map((p) => (
+                   <button
+                     key={p}
+                     onClick={() => handlePeriodChange(p)}
+                     className={`px-4 py-2 rounded-lg text-[12px] font-bold transition-all duration-200 ${
+                       period === p
+                         ? 'bg-[#a682ff]/20 text-[#c8a8ff] border border-[#a682ff]/20 shadow-sm'
+                         : 'text-slate-400 hover:text-white'
+                     }`}
+                   >
+                     {p}
+                   </button>
+                 ))}
               </div>
             </div>
           </section>
@@ -243,7 +311,14 @@ const AdminAnalytics = () => {
                   </div>
                   <div>
                     <p className="text-[10px] uppercase tracking-widest font-bold text-slate-500 mb-0.5">Network Density</p>
-                    <p className="text-2xl font-bold text-white">{data?.networkDensity || '—'}</p>
+                    <p className="text-2xl font-bold text-white">
+                      {data?.networkDensity ? (
+                        (() => {
+                          const val = typeof data.networkDensity === 'string' ? parseFloat(data.networkDensity) : data.networkDensity;
+                          return isNaN(val) ? data.networkDensity : `${val.toFixed(1)}%`;
+                        })()
+                      ) : '—'}
+                    </p>
                     <p className="text-[9px] text-emerald-400 font-medium">+0.05 index</p>
                   </div>
                 </div>

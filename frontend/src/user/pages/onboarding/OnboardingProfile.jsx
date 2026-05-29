@@ -23,42 +23,47 @@ const OnboardingProfile = () => {
   };
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center bg-[#0a0f1d] text-white overflow-hidden">
+    <div className="relative min-h-screen flex items-center justify-center bg-[#0B101E] text-white overflow-hidden p-6">
+      {/* Abstract Background Glow Elements */}
+      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-indigo-500/5 blur-[120px] rounded-full -z-10" />
+      <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-purple-500/5 blur-[120px] rounded-full -z-10" />
+
       {/* Corner Mandala Illustrations */}
-      <img src={process.env.PUBLIC_URL + "/onboarding_profile_illustration_1779854496977.png"} alt="Mandala" className="absolute left-0 top-0 w-48 opacity-30" />
-      <img src={process.env.PUBLIC_URL + "/onboarding_profile_illustration_1779854496977.png"} alt="Mandala" className="absolute right-0 bottom-0 w-48 opacity-30 transform rotate-180" />
+      <img src={process.env.PUBLIC_URL + "/onboarding_profile_illustration_1779854496977.png"} alt="Mandala" className="absolute left-0 top-0 w-48 opacity-10 pointer-events-none" />
+      <img src={process.env.PUBLIC_URL + "/onboarding_profile_illustration_1779854496977.png"} alt="Mandala" className="absolute right-0 bottom-0 w-48 opacity-10 transform rotate-180 pointer-events-none" />
+      
       {/* Card */}
-      <div className="w-full max-w-4xl bg-[#161f33]/40 backdrop-blur-xl border border-white/10 rounded-[32px] shadow-2xl p-8 relative z-10">
-        <p className="text-xs text-slate-400 mb-2">Step 1 of 3</p>
-        <h1 className="text-2xl font-bold mb-2">Tell us about you</h1>
-        <p className="text-sm text-slate-400 mb-6">This helps Skill Mandala personalize matches and recommendations.</p>
-        <form onSubmit={handleNext} className="space-y-4">
+      <div className="w-full max-w-xl bg-[#12182B]/60 backdrop-blur-xl border border-slate-700/50 rounded-[40px] shadow-2xl p-10 relative z-10">
+        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 mb-2">Step 1 of 3</p>
+        <h1 className="text-3xl font-black text-white tracking-tight mb-2">Tell us about you</h1>
+        <p className="text-slate-400 text-sm font-medium mb-8">This helps Skill Mandala personalize matches and recommendations.</p>
+        <form onSubmit={handleNext} className="space-y-6">
           <div>
-            <label className="block text-xs font-semibold mb-1">Short bio</label>
+            <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Short bio</label>
             <textarea
               value={profileData.bio}
               onChange={e => handleChange("bio", e.target.value)}
-              className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+              className="w-full px-4 py-3 rounded-2xl bg-slate-950 border border-slate-800 text-slate-100 text-sm focus:outline-none focus:border-indigo-500/50 focus:ring-2 focus:ring-indigo-500/10 transition duration-300"
               rows={3}
               placeholder="e.g. CS student interested in web dev & guitar."
             />
           </div>
           <div>
-            <label className="block text-xs font-semibold mb-1">Location (city / country)</label>
+            <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Location (city / country)</label>
             <input
               value={profileData.location}
               onChange={e => handleChange("location", e.target.value)}
-              className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+              className="w-full px-4 py-3 rounded-2xl bg-slate-950 border border-slate-800 text-slate-100 text-sm focus:outline-none focus:border-indigo-500/50 focus:ring-2 focus:ring-indigo-500/10 transition duration-300"
               placeholder="Kathmandu, Nepal"
             />
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-xs font-semibold mb-1">Experience level</label>
+              <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Experience level</label>
               <select
                 value={profileData.experience}
                 onChange={e => handleChange("experience", e.target.value)}
-                className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+                className="w-full px-4 py-3 rounded-2xl bg-slate-950 border border-slate-800 text-slate-100 text-sm focus:outline-none focus:border-indigo-500/50 focus:ring-2 focus:ring-indigo-500/10 transition duration-300"
               >
                 <option value="">Select</option>
                 <option value="beginner">Beginner</option>
@@ -67,11 +72,11 @@ const OnboardingProfile = () => {
               </select>
             </div>
             <div>
-              <label className="block text-xs font-semibold mb-1">Preferred mode</label>
+              <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Preferred mode</label>
               <select
                 value={profileData.mode}
                 onChange={e => handleChange("mode", e.target.value)}
-                className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+                className="w-full px-4 py-3 rounded-2xl bg-slate-950 border border-slate-800 text-slate-100 text-sm focus:outline-none focus:border-indigo-500/50 focus:ring-2 focus:ring-indigo-500/10 transition duration-300"
               >
                 <option value="">Select</option>
                 <option value="online">Online only</option>
@@ -82,7 +87,7 @@ const OnboardingProfile = () => {
           </div>
           <button
             type="submit"
-            className="w-full mt-2 py-2.5 rounded-full text-sm font-semibold bg-gradient-to-r from-[#d04a86] to-[#a85be3] hover:brightness-110 transition"
+            className="w-full mt-4 py-4 rounded-[20px] text-[11px] font-black uppercase tracking-widest bg-indigo-500 text-[#0B101E] hover:bg-white hover:text-indigo-600 transition-all duration-300 shadow-xl shadow-indigo-500/10"
           >
             Next: Skills you can teach
           </button>

@@ -62,7 +62,7 @@ const UserLandingNavbar = () => {
           {token ? (
             <button
               onClick={handleLogout}
-              className="px-6 py-2 rounded-full bg-white text-black text-xs font-black uppercase tracking-widest hover:bg-blue-500 hover:text-white transition-all shadow-xl"
+              className="px-6 py-2 rounded-full text-xs font-black uppercase tracking-widest bg-gradient-to-r from-purple-500 via-pink-500 to-rose-500 text-white hover:brightness-110 transition-all shadow-xl"
             >
               {t('logout')}
             </button>
@@ -76,7 +76,7 @@ const UserLandingNavbar = () => {
               </Link>
               <Link
                 to="/signup"
-                className="px-6 py-2 rounded-full bg-blue-600 text-white text-xs font-black uppercase tracking-widest hover:bg-white hover:text-black transition-all shadow-xl"
+                className="px-6 py-2 rounded-full text-xs font-black uppercase tracking-widest bg-gradient-to-r from-purple-500 via-pink-500 to-rose-500 text-white hover:brightness-110 transition-all shadow-xl"
               >
                 {t('join_now')}
               </Link>

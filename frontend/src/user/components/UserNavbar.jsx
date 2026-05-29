@@ -18,7 +18,8 @@ import {
   Languages,
   Wallet,
   Menu,
-  X
+  X,
+  ShieldAlert
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
@@ -72,11 +73,22 @@ const UserNavbar = () => {
       fetchMessageCount();
       fetchNotifications();
       fetchSessionCount();
+
+      const handleSync = () => {
+        fetchNotifications();
+      };
+      window.addEventListener("notifications-updated", handleSync);
+
       const interval = setInterval(() => {
         fetchMessageCount();
+        fetchNotifications();
         fetchSessionCount();
       }, 15000);
-      return () => clearInterval(interval);
+
+      return () => {
+        clearInterval(interval);
+        window.removeEventListener("notifications-updated", handleSync);
+      };
     }
   }, [currentUserId]);
 
@@ -132,6 +144,7 @@ const UserNavbar = () => {
       if (type === "MATCH") navigate("/matches");
       else if (type === "SESSION") navigate("/sessions");
       else if (type === "POST") navigate("/community");
+      else if (type === "SAFETY_REPORT") navigate("/notifications");
       setShowNotifications(false);
     } catch (err) {
       console.error("Failed to mark notification as read:", err);
@@ -259,67 +272,18 @@ const UserNavbar = () => {
                </button>
             </div>
 
-            <div className="relative" ref={dropdownRef}>
+            <div className="relative">
               <button 
-                onClick={() => setShowNotifications(!showNotifications)}
-                className={`p-2 rounded-full transition-all relative ${showNotifications ? 'bg-indigo-500/20 text-indigo-300' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}
+                onClick={() => navigate("/notifications")}
+                className="p-2 rounded-full transition-all relative text-slate-400 hover:text-white hover:bg-white/5"
               >
                 <Bell size={20} />
                 {unreadCount > 0 && (
                   <span className="absolute top-1 right-1 min-w-[18px] h-[18px] flex items-center justify-center bg-rose-500 text-white text-[10px] font-black rounded-full border-2 border-[#0B101E]">
-                    {unreadCount > 9 ? '9+' : unreadCount}
+                    {unreadCount}
                   </span>
                 )}
               </button>
-
-              <AnimatePresence>
-                {showNotifications && (
-                  <motion.div 
-                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                    className="absolute right-0 mt-4 w-[340px] bg-[#111827] border border-slate-700/60 rounded-[24px] shadow-2xl overflow-hidden z-50 origin-top-right"
-                  >
-                    <div className="px-5 py-4 border-b border-slate-800 flex items-center justify-between">
-                      <h3 className="text-[14px] font-black text-white">{t('notifications')}</h3>
-                      <button className="text-[10px] uppercase font-black tracking-widest text-indigo-400 hover:text-indigo-300">View All</button>
-                    </div>
-
-                    <div className="max-h-[400px] overflow-y-auto overflow-x-hidden custom-scrollbar">
-                      {notifications.length === 0 ? (
-                        <div className="py-12 text-center opacity-20">
-                          <Bell size={32} className="mx-auto mb-2" />
-                          <p className="text-[11px] font-bold uppercase tracking-widest">No notifications</p>
-                        </div>
-                      ) : (
-                        notifications.map((notif) => (
-                          <div 
-                            key={notif.id} 
-                            onClick={() => markAsRead(notif.id, notif.type)}
-                            className={`px-5 py-4 border-b border-slate-800/40 cursor-pointer transition-all hover:bg-white/5 relative group ${!notif.read ? 'bg-indigo-500/[0.03]' : ''}`}
-                          >
-                            {!notif.read && <div className="absolute left-2 top-1/2 -translate-y-1/2 w-1.5 h-1.5 bg-indigo-500 rounded-full" />}
-                            <div className="flex gap-4">
-                              <div className="w-9 h-9 rounded-xl shrink-0 flex items-center justify-center bg-white/5 border border-white/5 group-hover:border-white/10">
-                                {notif.type === 'MATCH' ? <Heart size={14} className="text-rose-400" /> : notif.type === 'SESSION' ? <CalendarDays size={14} className="text-emerald-400" /> : <Sparkles size={14} className="text-indigo-400" />}
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <p className={`text-[12.5px] leading-snug break-words ${!notif.read ? 'text-white font-bold' : 'text-slate-400 font-medium'}`}>
-                                  {notif.message}
-                                </p>
-                                <div className="flex items-center gap-2 mt-1.5 opacity-60">
-                                  <Clock size={10} />
-                                  <span className="text-[10px] font-bold uppercase tracking-wide">{formatTime(notif.createdAt)}</span>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        ))
-                      )}
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
             </div>
 
             <div className="h-6 w-px bg-slate-800" />

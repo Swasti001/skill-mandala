@@ -381,43 +381,59 @@ const UserMessages = () => {
                                 <p className="text-[11px] font-black uppercase tracking-widest">No Active Nodes</p>
                             </div>
                         ) : (
-                            conversations.map(conv => (
-                                <div 
-                                    key={conv.id || `stub-${conv.otherUserId}`}
-                                    onClick={() => setSelectedConv(conv)}
-                                    className={`p-4 flex items-center gap-4 rounded-[28px] cursor-pointer transition-all relative group ${(selectedConv?.id === conv.id && conv.id !== null) || (selectedConv?.otherUserId === conv.otherUserId) ? 'bg-[#1C2133] border border-slate-700/60 shadow-xl' : 'hover:bg-white/5'}`}
-                                >
-                                    {((selectedConv?.id === conv.id && conv.id !== null) || (selectedConv?.otherUserId === conv.otherUserId)) && (
-                                        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-10 bg-[#A78BFA] rounded-r-full shadow-[0_0_10px_#A78BFA]"></div>
-                                    )}
-                                    <div className="relative shrink-0">
-                                        <Avatar 
-                                            src={conv.otherUserProfilePictureUrl} 
-                                            name={conv.otherUserName} 
-                                            size="sm" 
-                                            border={false} 
-                                            className="border-2 border-[#0B101E]" 
-                                        />
-                                        {conv.unreadCount > 0 && (
-                                            <div className="absolute -top-1 -right-1 min-w-5 h-5 px-1.5 bg-rose-500 rounded-full flex items-center justify-center text-[10px] font-black text-white shadow-lg animate-pulse">
-                                                {conv.unreadCount}
-                                            </div>
+                            conversations.map(conv => {
+                                const isSelected = (selectedConv?.id === conv.id && conv.id !== null) || (selectedConv?.otherUserId === conv.otherUserId);
+                                const isUnread = conv.unreadCount > 0;
+                                return (
+                                    <div 
+                                        key={conv.id || `stub-${conv.otherUserId}`}
+                                        onClick={() => setSelectedConv(conv)}
+                                        className={`p-4 flex items-center gap-4 rounded-[28px] cursor-pointer transition-all relative group ${
+                                            isSelected 
+                                                ? 'bg-[#1C2133] border border-slate-700/60 shadow-xl' 
+                                                : isUnread 
+                                                    ? 'bg-purple-500/10 border border-purple-500/30 shadow-[0_0_15px_rgba(168,85,247,0.08)]' 
+                                                    : 'hover:bg-white/5 border border-transparent'
+                                        }`}
+                                    >
+                                        {(isSelected || isUnread) && (
+                                            <div className={`absolute left-0 top-1/2 -translate-y-1/2 w-1 h-10 rounded-r-full shadow-[0_0_10px_#A78BFA] ${isSelected ? 'bg-[#A78BFA]' : 'bg-[#A78BFA]/50'}`}></div>
                                         )}
-                                    </div>
-                                    <div className="flex-1 overflow-hidden">
-                                        <div className="flex justify-between items-center mb-1">
-                                            <div className="flex items-center gap-1.5 overflow-hidden">
-                                                <h4 className={`text-[14px] font-black truncate leading-none ${selectedConv?.id === conv.id ? 'text-white' : 'text-slate-300'}`}>{conv.otherUserName}</h4>
-                                                {!conv.matched && <Lock size={10} className="text-slate-600 shrink-0" />}
-                                            </div>
-                                            <span className="text-[9px] font-black text-slate-500 uppercase tracking-tighter shrink-0">{formatTime(conv.lastMessageAt)}</span>
+                                        <div className="relative shrink-0">
+                                            <Avatar 
+                                                src={conv.otherUserProfilePictureUrl} 
+                                                name={conv.otherUserName} 
+                                                size="sm" 
+                                                border={false} 
+                                                className="border-2 border-[#0B101E]" 
+                                            />
+                                            {isUnread && (
+                                                <div className="absolute -top-1 -right-1 min-w-5 h-5 px-1.5 bg-purple-500 rounded-full flex items-center justify-center text-[10px] font-black text-white shadow-lg shadow-purple-500/30 animate-pulse">
+                                                    {conv.unreadCount}
+                                                </div>
+                                            )}
                                         </div>
-                                        <p className="text-[12px] text-slate-500 truncate font-semibold leading-tight">
-                                           {conv.lastMessage || "Establish first contact..."}
-                                        </p>
+                                        <div className="flex-1 overflow-hidden">
+                                            <div className="flex justify-between items-center mb-1">
+                                                <div className="flex items-center gap-1.5 overflow-hidden">
+                                                    <h4 className={`text-[14px] truncate leading-none ${
+                                                        isSelected 
+                                                            ? 'text-white font-black' 
+                                                            : isUnread 
+                                                                ? 'text-[#A78BFA] font-black drop-shadow-[0_0_8px_rgba(168,85,247,0.3)]' 
+                                                                : 'text-slate-300 font-bold'
+                                                    }`}>{conv.otherUserName}</h4>
+                                                    {!conv.matched && <Lock size={10} className="text-slate-600 shrink-0" />}
+                                                </div>
+                                                <span className={`text-[9px] font-black uppercase tracking-tighter shrink-0 ${isUnread ? 'text-[#A78BFA]' : 'text-slate-500'}`}>{formatTime(conv.lastMessageAt)}</span>
+                                            </div>
+                                            <p className={`text-[12px] truncate leading-tight ${isUnread ? 'text-slate-200 font-bold' : 'text-slate-500 font-semibold'}`}>
+                                               {conv.lastMessage || "Establish first contact..."}
+                                            </p>
+                                        </div>
                                     </div>
-                                </div>
-                            ))
+                                );
+                            })
                         )}
                     </div>
                 </motion.div>

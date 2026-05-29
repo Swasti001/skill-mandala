@@ -86,6 +86,13 @@ const SessionsPage = () => {
   }, [userId, fetchSessions, t]);
 
   const handleAction = async (sessionId, type) => {
+    // Optimistic local UI updates
+    if (type === 'accept') {
+      setSessions(prev => prev.map(s => s.sessionId === sessionId ? { ...s, status: 'ACCEPTED' } : s));
+    } else if (type === 'reject') {
+      setSessions(prev => prev.map(s => s.sessionId === sessionId ? { ...s, status: 'DECLINED' } : s));
+    }
+
     setActionLoading(sessionId);
     try {
       await api.post(`/user/sessions/${sessionId}/${type}`, {});
@@ -98,10 +105,11 @@ const SessionsPage = () => {
         }
       }
       
-      setTimeout(fetchSessions, 500);
+      fetchSessions();
     } catch (err) {
       console.error(`${type} failed:`, err);
       alert(`Unable to ${type} session. Please try again.`);
+      fetchSessions(); // Rollback to actual backend state
     } finally {
       setActionLoading(null);
     }
@@ -151,7 +159,7 @@ const SessionsPage = () => {
 
   const getStatusColor = (status) => {
     const s = status?.toLowerCase();
-    if (s === 'accepted' || s === 'matched') return 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20';
+    if (s === 'accepted' || s === 'matched') return 'text-purple-400 bg-purple-500/10 border-purple-500/20 shadow-[0_0_12px_rgba(168,85,247,0.15)]';
     if (s === 'active') return 'text-sky-400 bg-sky-500/10 border-sky-500/20';
     if (s === 'booked') return 'text-teal-400 bg-teal-500/10 border-teal-500/20';
     if (s === 'completed') return 'text-indigo-400 bg-indigo-500/10 border-indigo-500/20';
@@ -245,173 +253,202 @@ const SessionsPage = () => {
       ) : (
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
           <AnimatePresence>
-            {filteredSessions.map((session, idx) => (
-              <motion.div 
-                key={session.sessionId}
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                transition={{ duration: 0.3 }}
-                className={`group relative ${session.status === 'ACTIVE' ? 'ring-2 ring-sky-500 ring-offset-4 ring-offset-[#0B101E] rounded-[48px] shadow-[0_0_40px_rgba(14,165,233,0.2)]' : ''}`}
-              >
-                 <div className={`bg-[#12182B]/60 backdrop-blur-xl border border-slate-700/50 rounded-[48px] p-10 hover:border-indigo-500/40 transition-all duration-500 shadow-2xl relative overflow-hidden ${session.status === 'ACTIVE' ? 'bg-sky-500/5' : ''}`}>
-                    
-                    <div className="absolute top-10 right-10 flex flex-col items-end gap-3">
-                       <div className={`px-5 py-2 rounded-full border text-[10px] font-black uppercase tracking-widest flex items-center gap-2 ${getStatusColor(session.status)} shadow-lg`}>
-                          {getStatusIcon(session.status)}
-                          {t(session.status?.toLowerCase()) || session.status}
-                       </div>
-                       {session.status === 'ACTIVE' && (
-                         <div className="flex items-center gap-2 text-[9px] font-black text-sky-400 uppercase tracking-widest bg-sky-500/10 px-3 py-1 rounded-full">
-                            <span className="w-2 h-2 rounded-full bg-sky-400 animate-pulse" />
-                            {t('live_now')}
+            {filteredSessions.map((session, idx) => {
+              const isIncomingPending = activeTab === 'pending' && session.incoming && session.status === 'PENDING';
+              const isAccepted = session.status === 'ACCEPTED' || session.status === 'MATCHED';
+
+              return (
+                <motion.div 
+                  key={session.sessionId}
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  transition={{ duration: 0.3 }}
+                  className={`group relative rounded-[48px] transition-all duration-500 ${
+                    session.status === 'ACTIVE' 
+                      ? 'ring-2 ring-sky-500 ring-offset-4 ring-offset-[#0B101E] shadow-[0_0_40px_rgba(14,165,233,0.2)]' 
+                      : isIncomingPending 
+                        ? 'ring-2 ring-purple-500/50 ring-offset-4 ring-offset-[#0B101E] shadow-[0_0_30px_rgba(168,85,247,0.15)] animate-[pulse_3s_infinite_ease-in-out]' 
+                        : ''
+                  }`}
+                >
+                   <div className={`bg-[#12182B]/60 backdrop-blur-xl border border-slate-700/50 rounded-[48px] p-10 hover:border-purple-500/40 transition-all duration-500 shadow-2xl relative overflow-hidden ${session.status === 'ACTIVE' ? 'bg-sky-500/5' : ''} ${isIncomingPending ? 'bg-purple-500/[0.02]' : ''}`}>
+                      
+                      <div className="absolute top-10 right-10 flex flex-col items-end gap-3">
+                         <div className={`px-5 py-2 rounded-full border text-[10px] font-black uppercase tracking-widest flex items-center gap-2 ${getStatusColor(session.status)} shadow-lg`}>
+                            {getStatusIcon(session.status)}
+                            {t(session.status?.toLowerCase()) || session.status}
                          </div>
-                       )}
-                    </div>
-
-                    <div className="flex items-start gap-8 mb-10">
-                       <Avatar 
-                         src={session.otherUserProfilePictureUrl} 
-                         name={session.otherUserName} 
-                         size="lg" 
-                         border={true} 
-                         className="rounded-3xl" 
-                       />
-                       <div>
-                          <p className="text-[10px] font-black uppercase text-indigo-400 tracking-[0.3em] mb-2">{t('co_weaver')}</p>
-                          <h3 className="text-3xl font-black text-white leading-tight tracking-tight">{session.otherUserName}</h3>
-                          <div className="flex flex-wrap items-center gap-5 mt-3">
-                             <div className="flex items-center gap-2 text-[12px] font-bold text-slate-400">
-                                <Clock size={14} className="text-indigo-400" /> {session.dateTime}
-                             </div>
-                             <div className="flex items-center gap-2 text-[12px] font-bold text-slate-400">
-                                {session.mode?.toLowerCase() === 'online' ? <Monitor size={14} className="text-indigo-400" /> : <MapPin size={14} className="text-indigo-400" />}
-                                {session.mode?.replace('_', ' ')}
-                             </div>
-                          </div>
-                       </div>
-                    </div>
-
-                    <div className="bg-white/5 rounded-[32px] border border-white/5 p-8 flex flex-col md:flex-row items-center justify-between gap-8 mb-10">
-                       <div className="flex-1 space-y-3">
-                          <p className="text-[10px] font-black uppercase text-slate-500 tracking-widest text-center md:text-left">{t('synced_learning')}</p>
-                          <div className="flex flex-wrap gap-2.5 justify-center md:justify-start">
-                             {session.youLearn?.map(s => (
-                               <span key={s} className="px-4 py-1.5 bg-indigo-500/10 text-white border border-indigo-500/20 rounded-2xl text-[12px] font-black">{s}</span>
-                             ))}
-                          </div>
-                       </div>
-
-                       <div className="w-12 h-12 rounded-full bg-slate-900 border border-slate-700 flex items-center justify-center text-slate-500 shadow-inner shrink-0 rotate-90 md:rotate-0">
-                          <ArrowRightLeft size={18} />
-                       </div>
-
-                       <div className="flex-1 space-y-3 text-center md:text-right">
-                          <p className="text-[10px] font-black uppercase text-slate-500 tracking-widest">{t('expertise_shared')}</p>
-                          <div className="flex flex-wrap gap-2.5 justify-center md:justify-end">
-                             {session.youTeach?.map(s => (
-                               <span key={s} className="px-4 py-1.5 bg-emerald-500/5 text-emerald-400 border border-emerald-500/10 rounded-2xl text-[12px] font-bold">{s}</span>
-                             ))}
-                          </div>
-                       </div>
-                    </div>
-
-                     {/* Topic Badge for booked sessions */}
-                     {session.topic && (
-                       <div className="flex items-center gap-2 mb-6 flex-wrap">
-                         <div className="inline-flex items-center gap-2 px-4 py-2 bg-purple-500/10 border border-purple-500/20 rounded-2xl">
-                           <BookOpen size={14} className="text-purple-400" />
-                           <span className="text-[12px] font-bold text-purple-400">{session.topic}</span>
-                         </div>
-                         {session.duration && (
-                           <div className="inline-flex items-center gap-2 px-4 py-2 bg-sky-500/10 border border-sky-500/20 rounded-2xl">
-                             <Timer size={14} className="text-sky-400" />
-                             <span className="text-[12px] font-bold text-sky-400">{session.duration} min</span>
+                         {session.status === 'ACTIVE' && (
+                           <div className="flex items-center gap-2 text-[9px] font-black text-sky-400 uppercase tracking-widest bg-sky-500/10 px-3 py-1 rounded-full">
+                              <span className="w-2 h-2 rounded-full bg-sky-400 animate-pulse" />
+                              {t('live_now')}
                            </div>
                          )}
-                       </div>
-                     )}
+                      </div>
 
-                    {activeTab === 'pending' && session.incoming ? (
-                       <div className="flex items-center gap-4">
-                          <button 
-                            disabled={actionLoading === session.sessionId}
-                            onClick={() => handleAction(session.sessionId, 'accept')}
-                            className="flex-1 py-5 bg-indigo-500 text-[#0B101E] text-[13px] font-black uppercase tracking-widest rounded-[24px] hover:bg-white transition-all shadow-xl flex items-center justify-center gap-3 disabled:opacity-50"
-                          >
-                             {actionLoading === session.sessionId ? <Loader2 className="animate-spin" /> : <Check size={18} strokeWidth={3} />}
-                             {t('accept_sync')}
-                          </button>
-                          <button 
-                            disabled={actionLoading === session.sessionId}
-                            onClick={() => handleAction(session.sessionId, 'reject')}
-                            className="bg-rose-500/10 border border-rose-500/20 text-rose-500 px-6 py-5 rounded-[24px] hover:bg-rose-500 hover:text-white transition shadow-lg flex items-center justify-center disabled:opacity-50"
-                          >
-                             <X size={20} strokeWidth={3} />
-                          </button>
-                       </div>
-                    ) : activeTab === 'pending' ? (
-                       <div className="w-full py-5 bg-white/5 border border-white/5 rounded-[24px] text-center">
-                          <p className="text-[12px] font-black text-slate-500 uppercase tracking-widest">{t('awaiting_calibration')}</p>
-                       </div>
-                    ) : activeTab === 'active' ? (
-                       <div className="flex flex-col gap-4">
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                             {session.hasZoomMeeting ? (
+                      <div className="flex items-start gap-8 mb-10">
+                         <Avatar 
+                           src={session.otherUserProfilePictureUrl} 
+                           name={session.otherUserName} 
+                           size="lg" 
+                           border={true} 
+                           className="rounded-3xl" 
+                         />
+                         <div>
+                            <p className="text-[10px] font-black uppercase text-purple-400 tracking-[0.3em] mb-2">{t('co_weaver')}</p>
+                            <h3 className="text-3xl font-black text-white leading-tight tracking-tight">{session.otherUserName}</h3>
+                            <div className="flex flex-wrap items-center gap-5 mt-3">
+                               <div className="flex items-center gap-2 text-[12px] font-bold text-slate-400">
+                                  <Clock size={14} className="text-purple-400" /> {session.dateTime}
+                               </div>
+                               <div className="flex items-center gap-2 text-[12px] font-bold text-slate-400">
+                                  {session.mode?.toLowerCase() === 'online' ? <Monitor size={14} className="text-purple-400" /> : <MapPin size={14} className="text-purple-400" />}
+                                  {session.mode?.replace('_', ' ')}
+                               </div>
+                            </div>
+                         </div>
+                      </div>
+
+                      <div className="bg-white/5 rounded-[32px] border border-white/5 p-8 flex flex-col md:flex-row items-center justify-between gap-8 mb-10">
+                         <div className="flex-1 space-y-3">
+                            <p className="text-[10px] font-black uppercase text-slate-500 tracking-widest text-center md:text-left">{t('synced_learning')}</p>
+                            <div className="flex flex-wrap gap-2.5 justify-center md:justify-start">
+                               {session.youLearn?.map(s => (
+                                 <span key={s} className="px-4 py-1.5 bg-indigo-500/10 text-white border border-indigo-500/20 rounded-2xl text-[12px] font-black">{s}</span>
+                               ))}
+                            </div>
+                         </div>
+
+                         <div className="w-12 h-12 rounded-full bg-slate-900 border border-slate-700 flex items-center justify-center text-slate-500 shadow-inner shrink-0 rotate-90 md:rotate-0">
+                            <ArrowRightLeft size={18} />
+                         </div>
+
+                         <div className="flex-1 space-y-3 text-center md:text-right">
+                            <p className="text-[10px] font-black uppercase text-slate-500 tracking-widest">{t('expertise_shared')}</p>
+                            <div className="flex flex-wrap gap-2.5 justify-center md:justify-end">
+                               {session.youTeach?.map(s => (
+                                 <span key={s} className="px-4 py-1.5 bg-purple-500/10 text-purple-300 border border-purple-500/20 rounded-2xl text-[12px] font-bold">{s}</span>
+                               ))}
+                            </div>
+                         </div>
+                      </div>
+
+                       {/* Topic Badge for booked sessions */}
+                       {session.topic && (
+                         <div className="flex items-center gap-2 mb-6 flex-wrap">
+                           <div className="inline-flex items-center gap-2 px-4 py-2 bg-purple-500/10 border border-purple-500/20 rounded-2xl">
+                             <BookOpen size={14} className="text-purple-400" />
+                             <span className="text-[12px] font-bold text-purple-400">{session.topic}</span>
+                           </div>
+                           {session.duration && (
+                             <div className="inline-flex items-center gap-2 px-4 py-2 bg-sky-500/10 border border-sky-500/20 rounded-2xl">
+                               <Timer size={14} className="text-sky-400" />
+                               <span className="text-[12px] font-bold text-sky-400">{session.duration} min</span>
+                             </div>
+                           )}
+                         </div>
+                       )}
+
+                      {activeTab === 'pending' && session.incoming ? (
+                         isAccepted ? (
+                           <button 
+                             disabled
+                             className="w-full py-5 bg-gradient-to-r from-purple-500 via-pink-500 to-rose-500 text-white text-[13px] font-black uppercase tracking-widest rounded-[24px] shadow-lg shadow-purple-500/30 flex items-center justify-center gap-3 transition-all duration-500 border-0 cursor-not-allowed"
+                           >
+                              <CheckCircle2 size={18} strokeWidth={3} />
+                              {t('accepted')}
+                           </button>
+                         ) : (
+                           <div className="flex items-center gap-4 w-full">
+                              <button 
+                                disabled={actionLoading === session.sessionId}
+                                onClick={() => handleAction(session.sessionId, 'accept')}
+                                className="flex-1 py-5 bg-gradient-to-r from-purple-500 via-pink-500 to-rose-500 text-white text-[13px] font-black uppercase tracking-widest rounded-[24px] hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl flex items-center justify-center gap-3 disabled:opacity-50 border-0"
+                              >
+                                 {actionLoading === session.sessionId ? <Loader2 className="animate-spin" /> : <Check size={18} strokeWidth={3} />}
+                                 {t('accept_sync')}
+                              </button>
+                              <button 
+                                disabled={actionLoading === session.sessionId}
+                                onClick={() => handleAction(session.sessionId, 'reject')}
+                                className="bg-rose-500/10 border border-rose-500/20 text-rose-500 px-6 py-5 rounded-[24px] hover:bg-rose-500 hover:text-white transition shadow-lg flex items-center justify-center disabled:opacity-50"
+                              >
+                                 <X size={20} strokeWidth={3} />
+                              </button>
+                           </div>
+                         )
+                      ) : activeTab === 'pending' ? (
+                         isAccepted ? (
+                           <div className="w-full py-5 bg-purple-500/10 border border-purple-500/20 rounded-[24px] text-center shadow-[0_0_15px_rgba(168,85,247,0.1)]">
+                              <p className="text-[12px] font-black text-purple-400 uppercase tracking-widest flex items-center justify-center gap-2">
+                                 <CheckCircle2 size={14} /> {t('accepted')}
+                              </p>
+                           </div>
+                         ) : (
+                           <div className="w-full py-5 bg-white/5 border border-white/5 rounded-[24px] text-center">
+                              <p className="text-[12px] font-black text-slate-500 uppercase tracking-widest">{t('awaiting_calibration')}</p>
+                           </div>
+                         )
+                      ) : activeTab === 'active' ? (
+                         <div className="flex flex-col gap-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                               {session.hasZoomMeeting ? (
+                                 <button 
+                                   onClick={() => handleJoinZoom(session.sessionId)}
+                                   className="py-5 bg-sky-500 text-white text-[13px] font-black uppercase tracking-widest rounded-[24px] hover:bg-white hover:text-sky-600 transition shadow-xl flex items-center justify-center gap-3"
+                                 >
+                                    <Video size={18} /> {t('join_zoom')}
+                                 </button>
+                               ) : (
+                                 <button 
+                                   disabled={actionLoading === session.sessionId}
+                                   onClick={() => handleStartZoom(session.sessionId)}
+                                   className="py-5 bg-indigo-500 text-[#0B101E] text-[13px] font-black uppercase tracking-widest rounded-[24px] hover:bg-white transition shadow-xl flex items-center justify-center gap-3 disabled:opacity-40"
+                                 >
+                                    {actionLoading === session.sessionId ? <Loader2 className="animate-spin text-white" /> : <Video size={18} />}
+                                    {t('start_zoom')}
+                                 </button>
+                               )}
                                <button 
-                                 onClick={() => handleJoinZoom(session.sessionId)}
-                                 className="py-5 bg-sky-500 text-white text-[13px] font-black uppercase tracking-widest rounded-[24px] hover:bg-white hover:text-sky-600 transition shadow-xl flex items-center justify-center gap-3"
-                               >
-                                  <Video size={18} /> {t('join_zoom')}
+                                 onClick={() => navigate('/messages', { state: { autoSelectUserId: session.otherUserId } })}
+                                 className="py-5 bg-white/5 border border-white/5 hover:bg-white/10 text-white text-[13px] font-black uppercase tracking-widest rounded-[24px] transition flex items-center justify-center gap-3"
+                                >
+                                  <MessageSquare size={18} /> {t('chat')}
                                </button>
-                             ) : (
+                            </div>
+                            
+                            {/* NEW: Complete Session Button */}
+                            {session.status === 'ACTIVE' && (
                                <button 
-                                 disabled={actionLoading === session.sessionId}
-                                 onClick={() => handleStartZoom(session.sessionId)}
-                                 className="py-5 bg-indigo-500 text-[#0B101E] text-[13px] font-black uppercase tracking-widest rounded-[24px] hover:bg-white transition shadow-xl flex items-center justify-center gap-3 disabled:opacity-40"
+                                 onClick={() => handleAction(session.sessionId, 'complete')}
+                                 className="w-full py-3 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[11px] font-black uppercase tracking-[0.2em] rounded-xl hover:bg-emerald-500 hover:text-white transition flex items-center justify-center gap-2"
                                >
-                                  {actionLoading === session.sessionId ? <Loader2 className="animate-spin text-white" /> : <Video size={18} />}
-                                  {t('start_zoom')}
+                                  <CheckCircle2 size={14} /> {t('mark_as_completed')}
                                </button>
-                             )}
+                            )}
+                         </div>
+                      ) : (
+                          <div className="space-y-4">
+                             <div className="w-full py-5 bg-white/5 border border-white/5 rounded-[24px] text-center relative overflow-hidden">
+                                <div className="absolute inset-0 bg-indigo-500/5 animate-pulse" />
+                                <p className="relative z-10 text-[10px] font-black text-indigo-400 uppercase tracking-widest flex items-center justify-center gap-2">
+                                  <Sparkles size={12} /> FEEDBACK REQUIRED
+                                </p>
+                                <p className="relative z-10 text-[12px] font-black text-slate-400 uppercase tracking-widest mt-1">{t('history_logged')}</p>
+                             </div>
                              <button 
-                               onClick={() => navigate('/messages', { state: { autoSelectUserId: session.otherUserId } })}
-                               className="py-5 bg-white/5 border border-white/5 hover:bg-white/10 text-white text-[13px] font-black uppercase tracking-widest rounded-[24px] transition flex items-center justify-center gap-3"
+                               onClick={() => { setFeedbackSession(session); setIsFeedbackOpen(true); }}
+                               className="w-full py-3 bg-indigo-500 text-[#0B101E] text-[11px] font-black uppercase tracking-[0.2em] rounded-xl hover:bg-white transition flex items-center justify-center gap-2 shadow-lg shadow-indigo-500/20"
                              >
-                                <MessageSquare size={18} /> {t('chat')}
+                                <Award size={14} /> {t('leave_review')}
                              </button>
                           </div>
-                          
-                          {/* NEW: Complete Session Button */}
-                          {session.status === 'ACTIVE' && (
-                             <button 
-                               onClick={() => handleAction(session.sessionId, 'complete')}
-                               className="w-full py-3 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[11px] font-black uppercase tracking-[0.2em] rounded-xl hover:bg-emerald-500 hover:text-white transition flex items-center justify-center gap-2"
-                             >
-                                <CheckCircle2 size={14} /> {t('mark_as_completed')}
-                             </button>
-                          )}
-                       </div>
-                    ) : (
-                        <div className="space-y-4">
-                           <div className="w-full py-5 bg-white/5 border border-white/5 rounded-[24px] text-center relative overflow-hidden">
-                              <div className="absolute inset-0 bg-indigo-500/5 animate-pulse" />
-                              <p className="relative z-10 text-[10px] font-black text-indigo-400 uppercase tracking-widest flex items-center justify-center gap-2">
-                                <Sparkles size={12} /> FEEDBACK REQUIRED
-                              </p>
-                              <p className="relative z-10 text-[12px] font-black text-slate-400 uppercase tracking-widest mt-1">{t('history_logged')}</p>
-                           </div>
-                           <button 
-                             onClick={() => { setFeedbackSession(session); setIsFeedbackOpen(true); }}
-                             className="w-full py-3 bg-indigo-500 text-[#0B101E] text-[11px] font-black uppercase tracking-[0.2em] rounded-xl hover:bg-white transition flex items-center justify-center gap-2 shadow-lg shadow-indigo-500/20"
-                           >
-                              <Award size={14} /> {t('leave_review')}
-                           </button>
-                        </div>
-                    )}
-                 </div>
-              </motion.div>
-            ))}
+                      )}
+                   </div>
+                </motion.div>
+              );
+            })}
           </AnimatePresence>
         </div>
       )}

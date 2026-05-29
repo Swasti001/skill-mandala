@@ -85,7 +85,37 @@ const AdminSkills = () => {
      }
   };
 
-  if (loading) return <div className="min-h-screen bg-[#0b101b] text-slate-50 font-sans flex items-center justify-center">Loading Skill Catalog...</div>;
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#0b101b] text-slate-50 font-sans">
+        <AdminNavbar />
+        <main className="ml-[200px] min-h-screen pt-20 px-8 pb-10 space-y-8 animate-pulse">
+          <div className="flex justify-between items-end">
+            <div>
+              <div className="h-8 w-48 bg-slate-800 rounded mb-2" />
+              <div className="h-4 w-[400px] bg-slate-800 rounded" />
+            </div>
+            <div className="h-10 w-48 bg-slate-800 rounded" />
+          </div>
+
+          <section className="grid grid-cols-1 md:grid-cols-4 gap-5">
+            {[1, 2, 3, 4].map(n => (
+              <div key={n} className="bg-[#151c2c]/40 border border-slate-800 rounded-2xl p-5 h-24" />
+            ))}
+          </section>
+
+          <section className="flex gap-6 items-start">
+            <div className="flex-1 grid grid-cols-1 xl:grid-cols-2 gap-5">
+              {[1, 2, 3, 4].map(n => (
+                <div key={n} className="bg-[#111726]/40 border border-slate-800 rounded-3xl p-6 h-64 animate-pulse" />
+              ))}
+            </div>
+            <div className="hidden lg:block w-[340px] h-[280px] bg-[#111626]/40 border border-slate-800 rounded-[32px] animate-pulse" />
+          </section>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#0b101b] text-slate-50 font-sans">

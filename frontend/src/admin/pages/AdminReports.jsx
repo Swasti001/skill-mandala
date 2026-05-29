@@ -68,6 +68,10 @@ const AdminReports = () => {
 
   useEffect(() => {
     fetchData();
+    const interval = setInterval(() => {
+      fetchData(true);
+    }, 30000);
+    return () => clearInterval(interval);
   }, []);
 
   // Update selection detail fields when selected report changes

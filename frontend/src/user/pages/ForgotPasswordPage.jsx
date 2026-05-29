@@ -121,7 +121,7 @@ const ForgotPasswordPage = () => {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 transition"
+                  className="w-full px-4 py-3 rounded-[20px] bg-slate-950 border border-slate-800 text-slate-100 text-sm placeholder-slate-600 focus:outline-none focus:border-purple-500/50 focus:ring-2 focus:ring-purple-500/10 transition duration-300"
                   placeholder="you@example.com"
                   required
                 />
@@ -129,7 +129,7 @@ const ForgotPasswordPage = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-3 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold text-sm hover:brightness-110 shadow-lg"
+                className="w-full mt-4 py-4 rounded-full text-xs font-black uppercase tracking-widest bg-gradient-to-r from-purple-500 via-pink-500 to-rose-500 text-white hover:brightness-110 transition-all duration-300 shadow-xl shadow-purple-500/10 disabled:opacity-50"
               >
                 {loading ? "Sending..." : "Send Reset Link"}
               </button>

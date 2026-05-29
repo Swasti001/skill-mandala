@@ -139,6 +139,82 @@ const UserDashboard = () => {
              </motion.div>
            )}
 
+{/* Badge Section placed above Today’s Agenda */}
+<div className="space-y-4 mt-4">
+  <div className="flex items-center justify-between">
+    <span className="text-[9px] font-black uppercase tracking-widest text-slate-500">Achievement Badges</span>
+    <span className="text-[8px] font-bold text-indigo-400 uppercase tracking-widest">{badges?.length || 0}/4 Unlocked</span>
+  </div>
+  {/* Progress Bar */}
+  <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
+    <div className="h-full bg-gradient-to-r from-indigo-500 to-amber-400 rounded-full transition-all duration-700" style={{ width: `${((badges?.length || 0) / 4) * 100}%` }} />
+  </div>
+  <div className="grid grid-cols-1 gap-3 pt-1">
+    {[
+      {
+        id: "Master Guru",
+        icon: "🏆",
+        label: "Master Guru",
+        desc: "Unlock Criteria",
+        criteria: "Teaching rep ≥ 4.5 stars & 5+ sessions taught",
+        color: "amber",
+      },
+      {
+        id: "Knowledge Seeker",
+        icon: "📖",
+        label: "Knowledge Seeker",
+        desc: "Unlock Criteria",
+        criteria: "Complete more than 5 learning sessions",
+        color: "emerald",
+      },
+      {
+        id: "Consistency King",
+        icon: "🔥",
+        label: "Consistency King",
+        desc: "Unlock Criteria",
+        criteria: "Maintain a 7-day activity streak",
+        color: "rose",
+      },
+      {
+        id: "Credit Whale",
+        icon: "🐳",
+        label: "Credit Whale",
+        desc: "Unlock Criteria",
+        criteria: "Hold more than 500 credits in your wallet",
+        color: "indigo",
+      },
+    ].map((b) => {
+      const earned = badges?.includes(b.id);
+      const colorMap = {
+        amber: { ring: "border-amber-400/40", bg: "bg-amber-400/10", text: "text-amber-300", dot: "bg-amber-400", glow: "shadow-[0_0_14px_rgba(251,191,36,0.3)]" },
+        emerald: { ring: "border-emerald-400/40", bg: "bg-emerald-400/10", text: "text-emerald-300", dot: "bg-emerald-400", glow: "shadow-[0_0_14px_rgba(52,211,153,0.3)]" },
+        rose: { ring: "border-rose-400/40", bg: "bg-rose-400/10", text: "text-rose-300", dot: "bg-rose-400", glow: "shadow-[0_0_14px_rgba(251,113,133,0.3)]" },
+        indigo: { ring: "border-indigo-400/40", bg: "bg-indigo-400/10", text: "text-indigo-300", dot: "bg-indigo-400", glow: "shadow-[0_0_14px_rgba(129,140,248,0.3)]" },
+      };
+      const c = colorMap[b.color];
+      return (
+        <div
+          key={b.id}
+          className={`flex items-center gap-4 p-4 rounded-2xl border transition-all duration-300 ${earned ? `${c.ring} ${c.bg} ${c.glow}` : "border-white/5 bg-white/[0.02] opacity-50"}`}
+        >
+          <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-xl flex-shrink-0 ${earned ? c.bg : "bg-white/5"}`}>
+            {b.icon}
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 mb-0.5">
+              <p className={`text-[11px] font-black uppercase tracking-wide truncate ${earned ? "text-white" : "text-slate-500"}`}>{b.label}</p>
+              {earned && <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${c.dot} animate-pulse`} />}
+            </div>
+            <p className={`text-[9px] leading-relaxed ${earned ? c.text : "text-slate-600"}`}>{earned ? "✓ Achieved" : b.criteria}</p>
+          </div>
+          {earned ? <Award size={16} className={c.text} /> : <span className="text-[9px] text-slate-700 font-black uppercase tracking-widest flex-shrink-0">Locked</span>}
+        </div>
+      );
+    })}
+  </div>
+</div>
+
+
            {/* SECTION 2: Today’s Sessions */}
            <section className="space-y-6">
               <div className="flex items-center justify-between px-2">
@@ -244,22 +320,6 @@ const UserDashboard = () => {
                      <div className="text-center p-4 bg-white/5 rounded-2xl border border-white/5">
                         <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest block mb-1">Knowledge Gained</span>
                         <span className="text-2xl font-black text-white leading-none">{stats?.totalLearningSessions || 0}h</span>
-                     </div>
-                  </div>
-
-                  <div className="space-y-4">
-                     <span className="text-[9px] font-black uppercase tracking-widest text-slate-500">Unlocked Archetypes</span>
-                     <div className="flex flex-wrap gap-3">
-                        {badges?.length > 0 ? badges.map(badge => (
-                           <div key={badge} className="group relative">
-                              <div className="w-12 h-12 bg-white/5 border border-white/5 rounded-xl flex items-center justify-center text-amber-400 shadow-xl hover:bg-amber-400 hover:text-[#0B101E] transition cursor-help">
-                                 <Award size={24} />
-                              </div>
-                              <span className="absolute -top-10 left-1/2 -translate-x-1/2 px-3 py-1 bg-white text-[#0B101E] text-[8px] font-black uppercase rounded shadow-2xl opacity-0 group-hover:opacity-100 transition whitespace-nowrap pointer-events-none">{badge}</span>
-                           </div>
-                        )) : (
-                          <p className="text-[8px] italic text-slate-600 uppercase tracking-widest">Achieve greatness to unlock badges</p>
-                        )}
                      </div>
                   </div>
                </div>

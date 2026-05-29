@@ -158,9 +158,10 @@ const UserLandingPage = () => {
           >
             <Link
               to={isAuthenticated ? "/dashboard" : "/signup"}
-              className="px-10 py-5 rounded-2xl text-sm font-black uppercase tracking-widest
-                         bg-white text-[#020617] shadow-[0_0_40px_rgba(255,255,255,0.3)]
-                         hover:scale-105 transition-all flex items-center gap-3"
+              className="px-10 py-5 rounded-2xl text-xs font-black uppercase tracking-widest
+                         bg-gradient-to-r from-purple-500 via-pink-500 to-rose-500 text-white
+                         shadow-[0_0_40px_rgba(168,85,247,0.3)]
+                         hover:brightness-110 hover:scale-105 transition-all duration-300 flex items-center gap-3"
             >
               {isAuthenticated ? "Enter Dashboard" : "Initiate Sequence"} <Zap size={16} fill="currentColor" />
             </Link>
@@ -294,9 +295,11 @@ const UserLandingPage = () => {
           <p className="text-slate-400 text-lg">Join the network. Offer a skill, learn a skill, and watch your mandala grow.</p>
           <Link
             to="/signup"
-            className="inline-block px-12 py-5 bg-white text-[#020617] rounded-2xl
-                       text-sm font-black uppercase tracking-widest shadow-2xl
-                       hover:scale-105 transition-all"
+            className="inline-block px-12 py-5 rounded-full
+                       text-xs font-black uppercase tracking-widest text-white
+                       bg-gradient-to-r from-purple-500 via-pink-500 to-rose-500
+                       shadow-[0_0_40px_rgba(168,85,247,0.3)]
+                       hover:brightness-110 hover:scale-105 transition-all duration-300"
           >
             Create Your Profile
           </Link>

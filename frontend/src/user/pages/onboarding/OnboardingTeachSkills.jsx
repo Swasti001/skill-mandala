@@ -84,21 +84,23 @@ const OnboardingTeachSkills = () => {
   };
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center bg-gradient-to-br from-[#0a0f1d] to-[#121829] text-white overflow-hidden">
-      {/* Simple Background with Corner Mandalas */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <img src={process.env.PUBLIC_URL + "/onboarding_teach_illustration_1779854532958.png"} alt="Mandala" className="absolute left-0 top-0 w-48 opacity-30" />
-        <img src={process.env.PUBLIC_URL + "/onboarding_teach_illustration_1779854532958.png"} alt="Mandala" className="absolute right-0 bottom-0 w-48 opacity-30 transform rotate-180" />
-      </div>
+    <div className="relative min-h-screen flex items-center justify-center bg-[#0B101E] text-white overflow-hidden p-6">
+      {/* Abstract Background Glow Elements */}
+      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-indigo-500/5 blur-[120px] rounded-full -z-10" />
+      <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-purple-500/5 blur-[120px] rounded-full -z-10" />
 
-      <div className="w-full max-w-xl bg-slate-900/40 backdrop-blur-xl border border-white/10 rounded-[32px] shadow-2xl p-8 relative z-10">
-        <p className="text-xs text-slate-400 mb-2">Step 2 of 3</p>
-        <h1 className="text-2xl font-bold mb-2">What can you teach?</h1>
-        <p className="text-sm text-slate-400 mb-6">
+      {/* Corner Mandala Illustrations */}
+      <img src={process.env.PUBLIC_URL + "/onboarding_teach_illustration_1779854532958.png"} alt="Mandala" className="absolute left-0 top-0 w-48 opacity-10 pointer-events-none" />
+      <img src={process.env.PUBLIC_URL + "/onboarding_teach_illustration_1779854532958.png"} alt="Mandala" className="absolute right-0 bottom-0 w-48 opacity-10 transform rotate-180 pointer-events-none" />
+
+      <div className="w-full max-w-xl bg-[#12182B]/60 backdrop-blur-xl border border-slate-700/50 rounded-[40px] shadow-2xl p-10 relative z-10">
+        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 mb-2">Step 2 of 3</p>
+        <h1 className="text-3xl font-black text-white tracking-tight mb-2">What can you teach?</h1>
+        <p className="text-slate-400 text-sm font-medium mb-8">
           Choose skills you feel comfortable teaching and your availability.
         </p>
 
-        <form onSubmit={handleNext} className="space-y-4">
+        <form onSubmit={handleNext} className="space-y-6">
           {/* Preset Skills */}
           <div className="grid grid-cols-2 gap-3 text-xs">
             {PRESET_SKILLS.map((skill) => (
@@ -106,10 +108,10 @@ const OnboardingTeachSkills = () => {
                 key={skill}
                 type="button"
                 onClick={() => toggleSkill(skill)}
-                className={`px-3 py-2 rounded-xl border text-left ${
+                className={`px-4 py-3 rounded-2xl border text-left font-bold transition duration-300 ${
                   teachSkills.includes(skill)
-                    ? "border-purple-400 bg-purple-500/20"
-                    : "border-slate-600 hover:bg-slate-800"
+                    ? "border-indigo-500 bg-indigo-500/10 text-indigo-300"
+                    : "border-slate-800 bg-transparent text-slate-400 hover:bg-white/5 hover:text-white"
                 }`}
               >
                 {skill}
@@ -119,7 +121,7 @@ const OnboardingTeachSkills = () => {
 
           {/* Custom Skill */}
           <div>
-            <label className="block text-xs font-semibold mb-1 mt-2">
+            <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">
               Add another skill
             </label>
 
@@ -127,15 +129,14 @@ const OnboardingTeachSkills = () => {
               <input
                 value={customSkill}
                 onChange={(e) => setCustomSkill(e.target.value)}
-                className="flex-1 px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-sm
-                focus:outline-none focus:ring-2 focus:ring-purple-500"
+                className="flex-1 px-4 py-3 rounded-2xl bg-slate-950 border border-slate-800 text-slate-100 text-sm focus:outline-none focus:border-indigo-500/50 focus:ring-2 focus:ring-indigo-500/10 transition duration-300"
                 placeholder="e.g. Photography"
               />
 
               <button
                 type="button"
                 onClick={handleAddCustom}
-                className="px-4 py-2 rounded-xl text-xs font-semibold border border-slate-600 hover:bg-slate-800"
+                className="px-6 py-3 rounded-2xl text-xs font-black uppercase tracking-widest border border-slate-850 hover:bg-white/5 transition"
               >
                 Add
               </button>
@@ -144,13 +145,13 @@ const OnboardingTeachSkills = () => {
 
           {/* Teach Availability */}
           <div>
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3 mt-2">
-              <label className="block text-xs font-semibold">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4 mt-2">
+              <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400">
                 When are you usually available to teach?
               </label>
               
               <div className="flex items-center gap-2">
-                <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Set all days:</span>
+                <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Set all:</span>
                 <select
                   onChange={(e) => {
                     const val = e.target.value;
@@ -158,10 +159,10 @@ const OnboardingTeachSkills = () => {
                       DAYS.forEach(day => handleAvailabilityChange(day, val));
                     }
                   }}
-                  className="px-2 py-1 rounded-xl bg-slate-950 border border-slate-700 text-xs focus:outline-none focus:ring-1 focus:ring-purple-500"
+                  className="px-3 py-1.5 rounded-xl bg-slate-950 border border-slate-800 text-xs focus:outline-none focus:border-indigo-500/50 focus:ring-2 focus:ring-indigo-500/10 transition duration-300"
                   defaultValue=""
                 >
-                  <option value="" disabled>Choose slot...</option>
+                  <option value="" disabled>Choose...</option>
                   {TIME_SLOTS.map((t) => (
                     <option key={t} value={t}>
                       {t}
@@ -174,14 +175,14 @@ const OnboardingTeachSkills = () => {
             <div className="grid grid-cols-2 gap-4 text-xs">
               {DAYS.map((day) => (
                 <div key={day} className="flex items-center gap-2">
-                  <span className="w-12">{day}</span>
+                  <span className="w-12 text-slate-400 font-bold">{day}</span>
 
                   <select
                     value={teachAvailability[day] || ""}
                     onChange={(e) =>
                       handleAvailabilityChange(day, e.target.value)
                     }
-                    className="flex-1 px-2 py-1 rounded-xl bg-slate-950 border border-slate-700 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    className="flex-1 px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 focus:outline-none focus:border-indigo-500/50 focus:ring-2 focus:ring-indigo-500/10 transition duration-300"
                   >
                     <option value="">Select time</option>
                     {TIME_SLOTS.map((t) => (
@@ -197,9 +198,7 @@ const OnboardingTeachSkills = () => {
 
           <button
             type="submit"
-            className="w-full mt-2 py-2.5 rounded-full text-sm font-semibold
-            bg-gradient-to-r from-purple-500 via-pink-500 to-rose-500
-            hover:brightness-110 transition"
+            className="w-full mt-4 py-4 rounded-[20px] text-[11px] font-black uppercase tracking-widest bg-indigo-500 text-[#0B101E] hover:bg-white hover:text-indigo-600 transition-all duration-300 shadow-xl shadow-indigo-500/10"
           >
             Next: Skills you want to learn
           </button>

@@ -5,7 +5,7 @@ import { Sparkles, Info } from "lucide-react";
 
 const MandalaTracker = ({ streak = 0, teachingHours = 0, learningHours = 0, completedGoals = 0 }) => {
   const daysInMonth = 31;
-  const habits = ["Coding", "Teaching", "Reading", "Meditation"];
+  const habits = ["Teaching", "Learning", "Credits", "Badges"];
   const numRings = habits.length;
   
   // Center and sizes
@@ -114,7 +114,8 @@ const MandalaTracker = ({ streak = 0, teachingHours = 0, learningHours = 0, comp
         <path
           key={`seg-${d}-${h}`}
           d={describeArc(cx, cy, rInner, rOuter, startAngle, endAngle)}
-          className={`${fillColor} ${isFilled ? "opacity-80" : "opacity-0"} stroke-white/20 stroke-[0.5px] transition-all duration-300`}
+          className={`${fillColor} ${isFilled ? "opacity-80" : "opacity-0 hover:opacity-20 hover:fill-white"} stroke-white/20 stroke-[0.5px] transition-all duration-300 cursor-pointer`}
+          onClick={() => toggleSegment(d, h)}
         />
       );
     }

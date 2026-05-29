@@ -26,11 +26,14 @@ const AdminDashboard = () => {
   const [error, setError] = useState("");
   const [period, setPeriod] = useState("Monthly");
 
-  const fetchStats = async (currentPeriod) => {
+  const fetchStats = async (currentPeriod, showFullscreen = false) => {
     try {
-      setLoading(true);
+      if (showFullscreen || !data) {
+        setLoading(true);
+      }
       const response = await adminApi.get(`/admin/dashboard-stats?period=${currentPeriod}`);
       setData(response.data);
+      setError("");
     } catch (err) {
       setError("Failed to fetch platform statistics.");
     } finally {
@@ -39,21 +42,66 @@ const AdminDashboard = () => {
   };
 
   useEffect(() => {
-    fetchStats(period);
+    fetchStats(period, true);
+    const interval = setInterval(() => {
+      fetchStats(period, false);
+    }, 30000);
+    return () => clearInterval(interval);
   }, [period]);
 
-  if (loading) {
+  if (loading && !data) {
     return (
-      <div className="min-h-screen bg-[#06142b] text-slate-50 flex items-center justify-center">
-        <div className="text-violet-300 animate-pulse text-xl">Initializing System...</div>
+      <div className="min-h-screen bg-[#06142b] text-slate-50">
+        <AdminNavbar />
+        <main className="ml-[200px] min-h-screen px-5 pb-5 pt-24 space-y-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="h-4 w-32 bg-slate-800/80 rounded animate-pulse mb-2" />
+              <div className="h-8 w-48 bg-slate-800/80 rounded animate-pulse" />
+            </div>
+            <div className="h-10 w-44 bg-slate-800/80 rounded-[12px] animate-pulse" />
+          </div>
+
+          <section className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+            {[1, 2, 3, 4].map((n) => (
+              <div
+                key={n}
+                className="rounded-xl border border-slate-800 bg-slate-800/40 p-5 shadow-lg h-32 animate-pulse flex flex-col justify-between"
+              >
+                <div className="flex justify-between items-start">
+                  <div className="h-10 w-10 bg-slate-700/60 rounded-lg" />
+                  <div className="h-4 w-16 bg-slate-700/60 rounded" />
+                </div>
+                <div className="space-y-2">
+                  <div className="h-6 w-24 bg-slate-700/60 rounded" />
+                  <div className="h-3 w-16 bg-slate-700/60 rounded" />
+                </div>
+              </div>
+            ))}
+          </section>
+
+          <section className="grid grid-cols-1 gap-4 xl:grid-cols-[2.2fr_1fr]">
+            <div className="rounded-xl border border-slate-800 bg-slate-800/40 p-5 h-[360px] animate-pulse" />
+            <div className="rounded-xl border border-slate-800 bg-slate-800/40 p-5 h-[360px] animate-pulse" />
+          </section>
+        </main>
       </div>
     );
   }
 
-  if (error) {
+  if (error && !data) {
     return (
-      <div className="min-h-screen bg-[#06142b] text-slate-50 flex items-center justify-center">
-        <div className="text-red-400 text-xl">{error}</div>
+      <div className="min-h-screen bg-[#06142b] text-slate-50 flex flex-col items-center justify-center gap-6">
+        <div className="p-4 bg-red-500/10 border border-red-500/20 text-red-400 rounded-2xl max-w-sm text-center">
+          <p className="font-bold text-lg mb-2">Platform Sync Error</p>
+          <p className="text-xs text-slate-400">{error}</p>
+        </div>
+        <button
+          onClick={() => fetchStats(period, true)}
+          className="px-6 py-3 bg-violet-600 hover:bg-violet-700 active:scale-95 transition-all text-white text-xs font-black uppercase tracking-widest rounded-xl shadow-lg shadow-violet-500/20"
+        >
+          Retry Connection
+        </button>
       </div>
     );
   }
@@ -62,8 +110,9 @@ const AdminDashboard = () => {
     {
       title: "Total Users",
       value: data.totalUsers.toLocaleString(),
-      meta: "Registered",
+      meta: "Live Synchronized",
       icon: Users,
+      isLive: true,
     },
     {
       title: "Active Sessions",
@@ -105,7 +154,13 @@ const AdminDashboard = () => {
                     <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-700/60 text-violet-200">
                       <Icon size={18} />
                     </div>
-                    <span className="text-[11px] font-semibold text-emerald-400">
+                    <span className={`text-[11px] font-semibold flex items-center gap-1.5 ${stat.isLive ? 'text-emerald-400 font-extrabold' : 'text-slate-400'}`}>
+                      {stat.isLive && (
+                        <span className="relative flex h-2 w-2">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                          <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                        </span>
+                      )}
                       {stat.meta}
                     </span>
                   </div>
@@ -287,10 +342,17 @@ const AdminDashboard = () => {
                 </thead>
 
                 <tbody>
-                  {data.recentSessions.map((session, index) => (
+                  {data.recentSessions
+                    .filter(session => 
+                      session.mentor && 
+                      session.mentee && 
+                      !session.mentor.startsWith("Unknown") && 
+                      !session.mentee.startsWith("Unknown")
+                    )
+                    .map((session, index, arr) => (
                     <tr
                       key={session.id}
-                      className={`${index !== data.recentSessions.length - 1 ? 'border-b border-slate-800/50' : ''} transition hover:bg-slate-800/30`}
+                      className={`${index !== arr.length - 1 ? 'border-b border-slate-800/50' : ''} transition hover:bg-slate-800/30`}
                     >
                       <td className="px-1 py-4">
                         <div className="flex items-center gap-3">
@@ -301,7 +363,7 @@ const AdminDashboard = () => {
                             <p className="text-[15px] font-medium text-slate-100">
                               {session.mentor}
                             </p>
-                            <p className="mt-0.5 text-[11px] text-slate-400">{session.role}</p>
+                            <p className="mt-0.5 text-[11px] text-slate-400">{session.role || "Provider"}</p>
                           </div>
                         </div>
                       </td>
@@ -312,16 +374,16 @@ const AdminDashboard = () => {
 
                       <td className="px-4 py-4">
                         <span className="rounded-md bg-violet-500/20 px-2.5 py-1 text-xs font-medium text-violet-200 border border-violet-500/10">
-                          {session.domain}
+                          {session.domain || "General"}
                         </span>
                       </td>
 
                       <td className="px-4 py-4">
                         <span
-                          className={`inline-flex items-center gap-2 text-xs font-medium ${statusStyles[session.status]}`}
+                          className={`inline-flex items-center gap-2 text-xs font-medium ${statusStyles[session.status] || 'text-slate-400'}`}
                         >
                           <span
-                            className={`h-1.5 w-1.5 rounded-full ${statusDots[session.status]}`}
+                            className={`h-1.5 w-1.5 rounded-full ${statusDots[session.status] || 'bg-slate-400'}`}
                           />
                           {session.status}
                         </span>
@@ -332,7 +394,7 @@ const AdminDashboard = () => {
                       </td>
                     </tr>
                   ))}
-                  {data.recentSessions.length === 0 && (
+                  {data.recentSessions.filter(s => s.mentor && !s.mentor.startsWith("Unknown") && s.mentee && !s.mentee.startsWith("Unknown")).length === 0 && (
                      <tr>
                         <td colSpan="5" className="px-4 py-8 text-center text-slate-400">
                            No recent sessions found.

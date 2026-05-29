@@ -902,7 +902,9 @@ public class AdminController {
     // ===== ANALYTICS =====
 
     @GetMapping("/analytics")
-    public ResponseEntity<?> getAnalytics(@RequestHeader(value = "Authorization", required = false) String authHeader) {
+    public ResponseEntity<?> getAnalytics(
+            @RequestHeader(value = "Authorization", required = false) String authHeader,
+            @RequestParam(value = "period", defaultValue = "Monthly") String period) {
         User user = userService.getUserFromToken(authHeader);
         if (!userService.isAdmin(user)) return org.springframework.http.ResponseEntity.status(org.springframework.http.HttpStatus.FORBIDDEN).body(Map.of("message", "Forbidden access"));
         try {
@@ -914,14 +916,25 @@ public class AdminController {
             // Real Avg Session Duration Mock (based on 60-90 min typical range + some variance)
             int avgTime = completedSessions > 0 ? (65 + (int)(completedSessions % 15)) : 0;
 
-            // Time-based stats mock improvements
+            // Period-aware acquisition data
             List<Map<String, Object>> acquisitionData = new ArrayList<>();
-            String[] months = {"Oct", "Nov", "Dec", "Jan", "Feb", "Mar"}; // Rolling 6 months
-            for (int i = 0; i < months.length; i++) {
+            String[] labels;
+            int divisor;
+            if ("Weekly".equalsIgnoreCase(period)) {
+                labels = new String[]{"Week 1", "Week 2", "Week 3", "Week 4"};
+                divisor = 4;
+            } else if ("Yearly".equalsIgnoreCase(period)) {
+                labels = new String[]{"2022", "2023", "2024", "2025"};
+                divisor = 1;
+            } else { // Monthly (default)
+                labels = new String[]{"Oct", "Nov", "Dec", "Jan", "Feb", "Mar"};
+                divisor = 6;
+            }
+            for (int i = 0; i < labels.length; i++) {
                 Map<String, Object> point = new HashMap<>();
-                point.put("month", months[i]);
-                // Semi-realistic growth trace
-                point.put("users", Math.max(2, (int)(totalUsers * (0.4 + (0.1 * i)))));
+                point.put("month", labels[i]);
+                // Scale proportionally so older periods show lower user counts
+                point.put("users", Math.max(2, (int)(totalUsers * (0.3 + (0.15 * i / Math.max(labels.length - 1, 1))))));
                 acquisitionData.add(point);
             }
 
@@ -958,7 +971,8 @@ public class AdminController {
             response.put("successRate", (activeSessions + completedSessions) > 0 ? Math.round((double) completedSessions / (activeSessions + completedSessions) * 100) : 0);
             response.put("acquisitionData", acquisitionData);
             response.put("trendingSkills", topSkills);
-            response.put("networkDensity", totalUsers > 0 ? Math.min(98.5, (double) (activeSessions + completedSessions) / totalUsers * 15) + "%" : "0%");
+            double rawDensity = totalUsers > 0 ? Math.min(98.5, (double) (activeSessions + completedSessions) / totalUsers * 15) : 0.0;
+            response.put("networkDensity", String.format(Locale.US, "%.1f%%", rawDensity));
             response.put("searchRelevancy", "94.2%");
             response.put("churnRisk", "2.1%");
             response.put("apiLatency", "28ms");
